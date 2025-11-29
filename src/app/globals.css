@@ -1,0 +1,140 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  /* RADIUS (Keeping your existing radius variables) */
+  --radius: 0.625rem;
+  /* (The radius-sm/md/lg/xl calculations stay the same in @theme inline) */
+
+  /* CORE BACKGROUND & TEXT */
+  --background: oklch(0.12 0.01 300);    /* Main Dark Background: #09030E */
+  --foreground: oklch(0.985 0 0);       /* White Text: #FFFFFF */
+
+  /* CARD & POPOVER (Base for the glassmorphism card, slightly lighter than background) */
+  --card: oklch(0.18 0.01 300);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.18 0.01 300);
+  --popover-foreground: oklch(0.985 0 0);
+
+  /* PRIMARY ACCENT (Vibrant Cyan - #45FEE8, used for buttons, active state, charge bar) */
+  --primary: oklch(0.9 0.2 180);
+  --primary-foreground: oklch(0.12 0.01 300); /* Dark text on primary */
+
+  /* SECONDARY ACCENT (Purple - #6E33B1, used for background gradient, subtle borders) */
+  --secondary: oklch(0.4 0.15 300);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  /* DESTRUCTIVE/DANGER (Red - #EC3434, used for errors/destructive actions) */
+  --destructive: oklch(0.6 0.2 30);
+  
+  /* BORDERS & INPUTS (Subtle white/light-colored borders) */
+  --border: oklch(0.985 0 0 / 0.1);
+  --input: oklch(0.985 0 0 / 0.15);
+  --ring: oklch(0.9 0.2 180); /* Use primary (cyan) for focus rings */
+
+  /* MUTED & ACCENT (For secondary text/hover states) */
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+
+  /* SIDEBAR (Match card style) */
+  --sidebar: oklch(0.18 0.01 300);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.9 0.2 180);
+  --sidebar-primary-foreground: oklch(0.12 0.01 300);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.985 0 0 / 0.1);
+  --sidebar-ring: oklch(0.556 0 0);
+
+  /* CHART COLORS (Using your main accents) */
+  --chart-1: oklch(0.9 0.2 180); /* Cyan */
+  --chart-2: oklch(0.4 0.15 300); /* Purple */
+  --chart-3: oklch(0.6 0.2 30); /* Red */
+  --chart-4: oklch(0.708 0 0); /* Muted */
+  --chart-5: oklch(0.556 0 0); /* Muted-Darker */
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.glassy-card {
+    backdrop-filter: blur(4px) saturate(80%);
+    -webkit-backdrop-filter: blur(9px) saturate(133%);
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    border: 1px solid rgba(209, 213, 219, 0.138);
+}
+
+@layer components {
+  /* 1. Main Background Container (Dark Gradient) */
+  .main-background {
+    background-color: var(--background);
+    /* Subtle radial gradient using the secondary purple accent for a moody glow */
+    background-image: radial-gradient(
+      circle at 50% 50%,
+      oklch(0.4 0.15 300 / 0.3), /* Faded Secondary Purple */
+      oklch(0.12 0.01 300 / 1) 70% /* Fades to background color */
+    );
+  }
+
+  /* 2. Glassmorphism Card Style (The core of your design) */
+
+
+  /* 3. Primary Button/Accent Bar Glow (e.g., the 124 count container or charge bar) */
+  .accent-glow {
+    /* Using the primary color (#45FEE8) for the outer glow */
+    box-shadow: 0 0 15px 5px oklch(0.9 0.2 180 / 0.3); 
+  }
+}

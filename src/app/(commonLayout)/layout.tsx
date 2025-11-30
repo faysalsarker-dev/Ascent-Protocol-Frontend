@@ -1,4 +1,3 @@
-import AppBar from "@/src/components/shared/AppBar";
 
 
 export default function commonLayout({
@@ -7,10 +6,10 @@ export default function commonLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="main-background min-h-screen flex flex-col items-center justify-center px-4">
+    <main className=" min-h-screen flex flex-col items-center justify-center px-4">
   
         {children}
-        <AppBar/>
+    
     </main>
   );
 }

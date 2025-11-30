@@ -15,7 +15,7 @@ const navItems:INavItem[] = [
   { href: '/', icon: "Home", label: 'Home' },
   { href: '/trips', icon: "Zap", label: 'Trips' },
   { href: '/map', icon: "Map", label: 'Map' },
-  { href: '/shop', icon: "ShoppingCart", label: 'Shop' },
+  { href: '/user/dashboard', icon: "ShoppingCart", label: 'Shop' },
   { href: '/settings', icon: "Settings", label: 'Settings' },
 ];
 

@@ -1,10 +1,11 @@
-'use client';
+
+"use client";
+
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useState } from "react";
 import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Label } from "@/src/components/ui/label";
 import {
@@ -15,11 +16,19 @@ import {
   SelectValue,
 } from "@/src/components/ui/select";
 import { toast } from "sonner";
-import { Trophy, Zap, Plus, ChevronRight, Dumbbell, Timer, Target } from "lucide-react";
+import {
+  Trophy,
+  Plus,
+  Dumbbell,
+  Target,
+} from "lucide-react";
 import { cn } from "@/src/lib/utils";
-import type { WorkoutDay } from "./CreateDaysStep";
+import { FormInput } from "@/src/components/ui/FormInput";
+import { MuscleGroup } from "@/src/types/workout.types";
+import { useWorkoutBuilder } from "@/src/context/WorkoutBuilderContext";
+import { useCreateExercise } from "@/src/hooks/useWorkoutPlan";
 
-const MUSCLE_GROUPS = [
+const MUSCLE_GROUPS: MuscleGroup[] = [
   "CHEST",
   "BACK",
   "SHOULDERS",
@@ -30,7 +39,7 @@ const MUSCLE_GROUPS = [
   "CORE",
   "CARDIO",
   "FULL_BODY",
-] as const;
+];
 
 const DAYS_MAP: Record<number, string> = {
   1: "Monday",
@@ -42,90 +51,110 @@ const DAYS_MAP: Record<number, string> = {
   7: "Sunday",
 };
 
+// Fixed schema with proper number handling
 const exerciseSchema = z.object({
   exerciseName: z.string().min(2, "Exercise name required").max(50),
-  muscleGroup: z.enum(MUSCLE_GROUPS),
-  targetSets: z.number().min(1, "Min 1 set").max(10, "Max 10 sets"),
+  muscleGroup: z.enum(MUSCLE_GROUPS as [MuscleGroup, ...MuscleGroup[]]),
   targetReps: z.string().min(1, "Required"),
-  targetWeight: z.number().optional(),
-  restSeconds: z.number().optional(),
+  targetSets: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined) return undefined;
+      const num = Number(val);
+      return isNaN(num) ? undefined : num;
+    },
+    z.number().positive("Must be positive")
+  ),
+  // Use preprocess to handle empty strings and convert to numbers
+  targetWeight: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined) return undefined;
+      const num = Number(val);
+      return isNaN(num) ? undefined : num;
+    },
+    z.number().positive("Must be positive").optional()
+  ),
+  restSeconds: z.preprocess(
+    (val) => {
+      if (val === '' || val === null || val === undefined) return undefined;
+      const num = Number(val);
+      return isNaN(num) ? undefined : num;
+    },
+    z.number().int("Must be a whole number").positive("Must be positive").optional()
+  ),
   notes: z.string().max(200).optional(),
 });
 
 type ExerciseFormData = z.infer<typeof exerciseSchema>;
 
-interface Exercise extends ExerciseFormData {
-  id: string;
-  dayId: string;
-}
-
-interface AddExercisesStepProps {
-  days: WorkoutDay[];
-  onComplete: (exercises: Record<string, Exercise[]>) => void;
-  onBack: () => void;
-}
-
- const AddExercisesStep = ({ days, onComplete, onBack }: AddExercisesStepProps) => {
+const AddExercisesStep = () => {
+  const { state, addExercise, goToPreviousStep, reset } = useWorkoutBuilder();
+  const { workoutDays, exercises } = state;
+  
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
-  const [exercisesByDay, setExercisesByDay] = useState<Record<string, Exercise[]>>({});
 
-  const workoutDays = days.filter((d) => !d.isRestDay);
-  const selectedDay = workoutDays.find((d) => d.id === selectedDayId);
+  const workoutDays_filtered = workoutDays.filter((d) => !d.isRestDay);
+  const selectedDay = workoutDays_filtered.find((d) => d.id === selectedDayId);
+
+  const createExerciseMutation = useCreateExercise(selectedDayId || "");
 
   const {
     register,
     handleSubmit,
     control,
-    reset,
+    reset: resetForm,
     formState: { errors },
   } = useForm<ExerciseFormData>({
     resolver: zodResolver(exerciseSchema),
     defaultValues: {
+      exerciseName: "",
       targetSets: 3,
+      targetReps: "",
+      targetWeight: undefined,
+      restSeconds: undefined,
+      notes: "",
     },
   });
 
-  const handleAddExercise = (data: ExerciseFormData) => {
-    if (!selectedDayId) return;
+  const handleAddExercise = async (data: ExerciseFormData) => {
+    if (!selectedDayId) {
+      toast.error("Please select a day first");
+      return;
+    }
 
-    const newExercise: Exercise = {
-      ...data,
-      id: crypto.randomUUID(),
-      dayId: selectedDayId,
-    };
+    try {
+      const result = await createExerciseMutation.mutateAsync(data);
 
-    console.log("Exercise Created:", data);
-
-    setExercisesByDay((prev) => ({
-      ...prev,
-      [selectedDayId]: [...(prev[selectedDayId] || []), newExercise],
-    }));
-
-    toast.success(
-      <div className="flex items-center gap-2">
-        <Zap className="w-4 h-4 text-primary" />
-        <span className="font-display">+1 Exercise Added!</span>
-      </div>,
-      { duration: 2000, className: "glass-card" }
-    );
-
-    reset({ targetSets: 3 });
+      if (result?.success && result.data) {
+        addExercise(selectedDayId, { ...data, id: result.data.id });
+        resetForm({
+          exerciseName: "",
+          targetSets: "",
+          targetReps: "",
+          targetWeight: undefined,
+          restSeconds: undefined,
+          notes: "",
+        });
+      }
+    } catch (error) {
+      console.error("Create exercise error:", error);
+    }
   };
 
   const handleFinish = () => {
-    const totalExercises = Object.values(exercisesByDay).flat().length;
+    const totalExercises = Object.values(exercises).flat().length;
+    
     if (totalExercises === 0) {
       toast.error("Add at least one exercise");
       return;
     }
 
-    console.log("Complete Workout Plan Exercises:", exercisesByDay);
-
     toast.success(
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-primary animate-pulse" />
-          <span className="font-display font-bold text-primary text-lg">LEVEL UP!</span>
+          <span className="font-display font-bold text-primary text-lg">
+            LEVEL UP!
+          </span>
         </div>
         <p className="text-sm text-muted-foreground">
           Workout plan complete with {totalExercises} exercises
@@ -134,7 +163,9 @@ interface AddExercisesStepProps {
       { duration: 4000, className: "glass-card border-primary/50" }
     );
 
-    onComplete(exercisesByDay);
+    setTimeout(() => {
+      reset();
+    }, 2000);
   };
 
   return (
@@ -146,14 +177,14 @@ interface AddExercisesStepProps {
           SELECT TRAINING DAY
         </h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-          {workoutDays.map((day) => {
-            const exerciseCount = exercisesByDay[day.id]?.length || 0;
+          {workoutDays_filtered.map((day) => {
+            const exerciseCount = exercises[day.id!]?.length || 0;
             const isSelected = selectedDayId === day.id;
 
             return (
               <button
                 key={day.id}
-                onClick={() => setSelectedDayId(day.id)}
+                onClick={() => setSelectedDayId(day.id!)}
                 className={cn(
                   "p-3 rounded-lg text-left transition-all duration-300 border-2",
                   isSelected
@@ -196,9 +227,9 @@ interface AddExercisesStepProps {
           </div>
 
           {/* Existing Exercises */}
-          {exercisesByDay[selectedDayId!]?.length > 0 && (
+          {exercises[selectedDayId!]?.length > 0 && (
             <div className="mb-4 space-y-2">
-              {exercisesByDay[selectedDayId!].map((ex, idx) => (
+              {exercises[selectedDayId!].map((ex, idx) => (
                 <div
                   key={ex.id}
                   className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/50"
@@ -207,7 +238,9 @@ interface AddExercisesStepProps {
                     {idx + 1}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="font-display text-sm truncate">{ex.exerciseName}</p>
+                    <p className="font-display text-sm truncate">
+                      {ex.exerciseName}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {ex.targetSets} × {ex.targetReps} • {ex.muscleGroup}
                     </p>
@@ -220,14 +253,17 @@ interface AddExercisesStepProps {
           <form onSubmit={handleSubmit(handleAddExercise)} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="form-field sm:col-span-2">
-                <Label>Exercise Name</Label>
-                <Input placeholder="e.g., Incline Bench Press" {...register("exerciseName")} />
-                {errors.exerciseName && (
-                  <p className="text-sm text-destructive">{errors.exerciseName.message}</p>
-                )}
+                <FormInput
+                  name="exerciseName"
+                  label="Exercise Name"
+                  control={control}
+                  placeholder="e.g., Incline Bench Press"
+                  type="text"
+                  required
+                />
               </div>
 
-              <div className="form-field">
+              <div className="form-field space-y-3">
                 <Label>Muscle Group</Label>
                 <Controller
                   name="muscleGroup"
@@ -239,7 +275,11 @@ interface AddExercisesStepProps {
                       </SelectTrigger>
                       <SelectContent className="glass-card border-primary/30">
                         {MUSCLE_GROUPS.map((group) => (
-                          <SelectItem key={group} value={group} className="font-body">
+                          <SelectItem
+                            key={group}
+                            value={group}
+                            className="font-body"
+                          >
                             {group.replace("_", " ")}
                           </SelectItem>
                         ))}
@@ -248,48 +288,57 @@ interface AddExercisesStepProps {
                   )}
                 />
                 {errors.muscleGroup && (
-                  <p className="text-sm text-destructive">Select a muscle group</p>
+                  <p className="text-sm text-destructive">
+                    Select a muscle group
+                  </p>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="form-field">
-                  <Label>Sets</Label>
-                  <Input
+                  <FormInput
+                    name="targetSets"
+                    label="Sets"
+                    placeholder="3"
+                    control={control}
                     type="number"
-                    min={1}
-                    max={10}
-                    {...register("targetSets", { valueAsNumber: true })}
+                    required
                   />
                 </div>
+
                 <div className="form-field">
-                  <Label>Reps</Label>
-                  <Input placeholder="8-12" {...register("targetReps")} />
+                  <FormInput
+                    name="targetReps"
+                    label="Reps"
+                    placeholder="8-12"
+                    control={control}
+                    type="text"
+                    required
+                  />
                 </div>
               </div>
 
               <div className="form-field">
-                <Label>Weight (kg) - Optional</Label>
-                <Input
+                <FormInput
+                  name="targetWeight"
+                  label="Weight (kg)"
+                  control={control}
+                  placeholder="Optional"
                   type="number"
-                  placeholder="60"
-                  {...register("targetWeight", { valueAsNumber: true })}
                 />
               </div>
 
               <div className="form-field">
-                <Label className="flex items-center gap-1">
-                  <Timer className="w-3 h-3" />
-                  Rest (sec) - Optional
-                </Label>
-                <Input
+                <FormInput
+                  name="restSeconds"
+                  label="Rest (sec)"
+                  control={control}
+                  placeholder="Optional"
                   type="number"
-                  placeholder="90"
-                  {...register("restSeconds", { valueAsNumber: true })}
                 />
               </div>
 
-              <div className="form-field sm:col-span-2">
+              <div className="form-field sm:col-span-2 space-y-3">
                 <Label>Notes (Optional)</Label>
                 <Textarea
                   placeholder="e.g., Focus on controlled movement"
@@ -298,7 +347,13 @@ interface AddExercisesStepProps {
               </div>
             </div>
 
-            <Button type="submit" variant="outline" size="lg" className="w-full">
+            <Button
+              type="submit"
+              variant="outline"
+              size="lg"
+              className="w-full"
+              disabled={createExerciseMutation.isPending}
+            >
               <Plus className="w-5 h-5" />
               ADD EXERCISE
             </Button>
@@ -308,10 +363,15 @@ interface AddExercisesStepProps {
 
       {/* Navigation */}
       <div className="flex gap-3">
-        <Button variant="ghost" size="lg" onClick={onBack} className="flex-1">
+        <Button
+          variant="ghost"
+          size="lg"
+          onClick={goToPreviousStep}
+          className="flex-1"
+        >
           BACK
         </Button>
-        <Button variant="level" size="lg" onClick={handleFinish} className="flex-1">
+        <Button size="lg" onClick={handleFinish} className="flex-1">
           <Trophy className="w-5 h-5" />
           FINISH PLAN
         </Button>

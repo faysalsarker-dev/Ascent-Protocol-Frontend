@@ -57,7 +57,6 @@ const normalizeHeaders = (headers?: HeadersInit): Record<string, string> => {
 
 const attachAuthHeader = async (headers?: HeadersInit) => {
   const accessToken = await getCookie("accessToken");
-  console.log(accessToken,'tokens');
   const normalized = normalizeHeaders(headers);
 
   if (accessToken && !normalized.Authorization) {
@@ -79,6 +78,8 @@ const refreshTokens = async () => {
     headers: {
       Cookie: `refreshToken=${refreshToken}`,
     },
+    credentials: "include",  
+
   });
 
   const result = await response.json().catch(() => null);
@@ -89,10 +90,10 @@ const refreshTokens = async () => {
     return false;
   }
 
-  const { accessToken } = extractTokens(result);
+  const { accessToken , refreshToken:newRefreshToken } = extractTokens(result);
 
   if (accessToken) {
-await persistTokens(accessToken)
+await persistTokens(accessToken, newRefreshToken)
   }
 
 
@@ -107,7 +108,6 @@ const serverFetchHelper = async (
 ): Promise<Response> => {
   const { headers, ...restOptions } = options;
   const accessToken = await getCookie("accessToken");
-  console.log(accessToken,'tokens');
   const response = await fetch(`${BACKEND_API_URL}${endpoint}`, {
 
    

@@ -1,26 +1,35 @@
+"use client";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Label } from "@/src/components/ui/label";
-import { toast } from "sonner";
 import { Dumbbell, Sparkles } from "lucide-react";
+import { FormButton } from "@/src/components/ui/FormButton";
+import { FormInput } from "@/src/components/ui/FormInput";
+import { useCreateWorkoutPlan } from "@/src/hooks/useWorkoutPlan";
+import { useWorkoutBuilder } from "@/src/context/WorkoutBuilderContext";
 
 const planSchema = z.object({
-  name: z.string().min(3, "Plan name must be at least 3 characters").max(50, "Plan name too long"),
-  description: z.string().min(10, "Description must be at least 10 characters").max(200, "Description too long"),
+  name: z
+    .string()
+    .min(3, "Plan name must be at least 3 characters")
+    .max(50, "Plan name too long"),
+  description: z
+    .string()
+    .min(10, "Description must be at least 10 characters")
+    .max(200, "Description too long"),
 });
 
 type PlanFormData = z.infer<typeof planSchema>;
 
-interface CreatePlanStepProps {
-  onSubmit: (data: PlanFormData) => void;
-}
+const CreatePlanStep = () => {
+  const { setPlan, goToNextStep } = useWorkoutBuilder();
+  const createPlanMutation = useCreateWorkoutPlan();
 
- const CreatePlanStep = ({ onSubmit }: CreatePlanStepProps) => {
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -29,28 +38,17 @@ interface CreatePlanStepProps {
   });
 
   const handleFormSubmit = async (data: PlanFormData) => {
-    console.log("Workout Plan Created:", data);
-    
-    // Placeholder for future data fetch
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    
-    toast.success(
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-full bg-primary/20">
-          <Sparkles className="w-5 h-5 text-primary" />
-        </div>
-        <div>
-          <p className="font-display font-bold text-primary">QUEST ACCEPTED!</p>
-          <p className="text-sm text-muted-foreground">New workout plan created</p>
-        </div>
-      </div>,
-      {
-        duration: 3000,
-        className: "glass-card border-primary/50",
+    try {
+      const result = await createPlanMutation.mutateAsync(data);
+      
+      if (result?.success && result.data) {
+        setPlan({ ...data, id: result.data.id });
+        goToNextStep();
       }
-    );
-    
-    onSubmit(data);
+    } catch (error) {
+      // Error is already handled in the mutation
+      console.error("Create plan error:", error);
+    }
   };
 
   return (
@@ -72,20 +70,17 @@ interface CreatePlanStepProps {
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
           <div className="form-field">
-            <Label htmlFor="name">Plan Name</Label>
-            <Input
-              id="name"
+            <FormInput
+              name="name"
+              label="Plan Name"
+              control={control}
               placeholder="e.g., Muscle Building Plan"
-              {...register("name")}
+              type="text"
+              required
             />
-            {errors.name && (
-              <p className="text-sm text-destructive animate-scale-in">
-                {errors.name.message}
-              </p>
-            )}
           </div>
 
-          <div className="form-field">
+          <div className="form-field space-y-3">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
@@ -99,14 +94,13 @@ interface CreatePlanStepProps {
             )}
           </div>
 
-          <Button
+          <FormButton
             type="submit"
-            variant="level"
-            size="lg"
-            className="w-full"
-            disabled={isSubmitting}
+            loading={isSubmitting || createPlanMutation.isPending}
+            variant="default"
+            className="w-full flex items-center justify-center gap-2"
           >
-            {isSubmitting ? (
+            {isSubmitting || createPlanMutation.isPending ? (
               <span className="animate-pulse">INITIATING...</span>
             ) : (
               <>
@@ -114,7 +108,7 @@ interface CreatePlanStepProps {
                 CREATE PLAN
               </>
             )}
-          </Button>
+          </FormButton>
         </form>
       </div>
     </div>

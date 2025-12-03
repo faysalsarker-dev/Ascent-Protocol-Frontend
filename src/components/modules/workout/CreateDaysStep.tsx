@@ -1,12 +1,14 @@
+"use client";
+
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
 import { Button } from "@/src/components/ui/button";
-import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Label } from "@/src/components/ui/label";
 import { Switch } from "@/src/components/ui/switch";
+import { FormInput } from "@/src/components/ui/FormInput";
+import { FormButton } from "@/src/components/ui/FormButton";
 import {
   Select,
   SelectContent,
@@ -15,26 +17,10 @@ import {
   SelectValue,
 } from "@/src/components/ui/select";
 import { toast } from "sonner";
-import { Calendar, Plus, Check, Bed, Flame } from "lucide-react";
+import { Calendar, Plus, Bed, Flame } from "lucide-react";
 import { cn } from "@/src/lib/utils";
-
-const daySchema = z.object({
-  dayOfWeek: z.number().min(1).max(7),
-  name: z.string().min(2, "Day name required").max(50),
-  isRestDay: z.boolean(),
-  notes: z.string().max(200).optional(),
-});
-
-type DayFormData = z.infer<typeof daySchema>;
-
-export interface WorkoutDay extends DayFormData {
-  id: string;
-}
-
-interface CreateDaysStepProps {
-  onSubmit: (days: WorkoutDay[]) => void;
-  onBack: () => void;
-}
+import { useCreateWorkoutDay } from "@/src/hooks/useWorkoutPlan";
+import { useWorkoutBuilder } from "@/src/context/WorkoutBuilderContext";
 
 const DAYS_OF_WEEK = [
   { value: 1, label: "Monday" },
@@ -46,8 +32,26 @@ const DAYS_OF_WEEK = [
   { value: 7, label: "Sunday" },
 ];
 
-export const CreateDaysStep = ({ onSubmit, onBack }: CreateDaysStepProps) => {
-  const [days, setDays] = useState<WorkoutDay[]>([]);
+const daySchema = z.object({
+  dayOfWeek: z.number().min(1).max(7),
+  name: z.string().min(2, "Day name required").max(50),
+  isRestDay: z.boolean(),
+  notes: z.string().max(200).optional(),
+});
+
+type DayFormData = z.infer<typeof daySchema>;
+
+const CreateDaysStep = () => {
+  const { state, addDay, goToNextStep, goToPreviousStep } = useWorkoutBuilder();
+  const { workoutPlan, workoutDays } = state;
+
+  if (!workoutPlan?.id) {
+    toast.error("No workout plan found. Please create a plan first.");
+    goToPreviousStep();
+    return null;
+  }
+
+  const createDayMutation = useCreateWorkoutDay(workoutPlan.id);
 
   const {
     register,
@@ -64,53 +68,43 @@ export const CreateDaysStep = ({ onSubmit, onBack }: CreateDaysStepProps) => {
   });
 
   const isRestDay = watch("isRestDay");
-  const usedDays = days.map((d) => d.dayOfWeek);
+  const usedDays = workoutDays.map((d) => d.dayOfWeek);
   const availableDays = DAYS_OF_WEEK.filter((d) => !usedDays.includes(d.value));
 
-  const handleAddDay = (data: DayFormData) => {
-    const newDay: WorkoutDay = {
-      ...data,
-      id: crypto.randomUUID(),
-    };
+  const handleAddDay = async (data: DayFormData) => {
+    try {
+      const result = await createDayMutation.mutateAsync(data);
 
-    console.log("Workout Day Created:", data);
-
-    setDays((prev) => [...prev, newDay]);
-
-    toast.success(
-      <div className="flex items-center gap-2">
-        <Check className="w-4 h-4 text-primary" />
-        <span className="font-display">
-          {DAYS_OF_WEEK.find((d) => d.value === data.dayOfWeek)?.label} Added!
-        </span>
-      </div>,
-      { duration: 2000, className: "glass-card" }
-    );
-
-    reset({ isRestDay: false, dayOfWeek: undefined as any, name: "", notes: "" });
+      if (result?.success && result.data) {
+        addDay({ ...data, id: result.data.id, workoutPlanId: workoutPlan.id });
+        reset({ isRestDay: false, dayOfWeek: undefined, name: "", notes: "" });
+      }
+    } catch (error) {
+      // Error is already handled in the mutation
+      console.error("Create day error:", error);
+    }
   };
 
   const handleComplete = () => {
-    if (days.length === 0) {
+    if (workoutDays.length === 0) {
       toast.error("Add at least one day to continue");
       return;
     }
-    console.log("All Workout Days:", days);
-    onSubmit(days);
+    goToNextStep();
   };
 
   return (
     <div className="animate-slide-up space-y-6">
       {/* Created Days Display */}
-      {days.length > 0 && (
+      {workoutDays.length > 0 && (
         <div className="status-window">
           <h3 className="text-sm font-display text-primary mb-3 flex items-center gap-2">
             <Calendar className="w-4 h-4" />
-            CREATED DAYS ({days.length}/7)
+            CREATED DAYS ({workoutDays.length}/7)
           </h3>
           <div className="grid grid-cols-7 gap-1">
             {DAYS_OF_WEEK.map((day) => {
-              const createdDay = days.find((d) => d.dayOfWeek === day.value);
+              const createdDay = workoutDays.find((d) => d.dayOfWeek === day.value);
               return (
                 <div
                   key={day.value}
@@ -161,7 +155,7 @@ export const CreateDaysStep = ({ onSubmit, onBack }: CreateDaysStepProps) => {
 
           <form onSubmit={handleSubmit(handleAddDay)} className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="form-field">
+              <div className="form-field space-y-3">
                 <Label>Day of Week</Label>
                 <Controller
                   name="dayOfWeek"
@@ -194,24 +188,32 @@ export const CreateDaysStep = ({ onSubmit, onBack }: CreateDaysStepProps) => {
               </div>
 
               <div className="form-field">
-                <Label htmlFor="name">Session Name</Label>
-                <Input
-                  id="name"
+                <FormInput
+                  name="name"
+                  label="Session Name"
+                  control={control}
                   placeholder="e.g., Chest & Shoulders"
-                  {...register("name")}
+                  type="text"
+                  required
                 />
-                {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name.message}</p>
-                )}
               </div>
             </div>
 
             <div className="flex items-center justify-between p-4 rounded-lg bg-muted/30 border border-border/50">
               <div className="flex items-center gap-3">
-                <Bed className={cn("w-5 h-5", isRestDay ? "text-secondary" : "text-muted-foreground")} />
+                <Bed
+                  className={cn(
+                    "w-5 h-5",
+                    isRestDay ? "text-secondary" : "text-muted-foreground"
+                  )}
+                />
                 <div>
-                  <Label htmlFor="isRestDay" className="cursor-pointer">Rest Day</Label>
-                  <p className="text-xs text-muted-foreground">Recovery is important!</p>
+                  <Label htmlFor="isRestDay" className="cursor-pointer">
+                    Rest Day
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Recovery is important!
+                  </p>
                 </div>
               </div>
               <Controller
@@ -227,7 +229,7 @@ export const CreateDaysStep = ({ onSubmit, onBack }: CreateDaysStepProps) => {
               />
             </div>
 
-            <div className="form-field">
+            <div className="form-field space-y-3">
               <Label htmlFor="notes">Notes (Optional)</Label>
               <Textarea
                 id="notes"
@@ -236,29 +238,42 @@ export const CreateDaysStep = ({ onSubmit, onBack }: CreateDaysStepProps) => {
               />
             </div>
 
-            <Button type="submit" variant="outline" size="lg" className="w-full">
+            <FormButton
+              type="submit"
+              loading={createDayMutation.isPending}
+              variant="default"
+              className="w-full flex items-center justify-center gap-2"
+            >
               <Plus className="w-5 h-5" />
               ADD DAY
-            </Button>
+            </FormButton>
           </form>
         </div>
       )}
 
       {/* Navigation */}
       <div className="flex gap-3">
-        <Button variant="ghost" size="lg" onClick={onBack} className="flex-1">
+        <Button
+          variant="ghost"
+          size="lg"
+          onClick={goToPreviousStep}
+          className="flex-1"
+        >
           BACK
         </Button>
         <Button
-          variant="level"
           size="lg"
           onClick={handleComplete}
           className="flex-1"
-          disabled={days.length === 0}
+          disabled={workoutDays.length === 0}
         >
-          {days.length === 7 ? "COMPLETE WEEK" : `CONTINUE (${days.length} days)`}
+          {workoutDays.length === 7
+            ? "COMPLETE WEEK"
+            : `CONTINUE (${workoutDays.length} days)`}
         </Button>
       </div>
     </div>
   );
 };
+
+export default CreateDaysStep;

@@ -2,12 +2,13 @@ import * as React from "react"
 
 import { cn } from "@/src/lib/utils"
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+function Card({ className, version, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card"
       className={cn(
-        "glassy-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
+        version === "lg" ? "glassy-card-lg" : "glassy-card",
+        "text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
         className
       )}
       {...props}

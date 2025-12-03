@@ -1,4 +1,5 @@
 import AppBar from "@/src/components/shared/AppBar";
+import ReactQueryProvider from "@/src/providers/ReactQueryProvider";
 
 
 export default function userLayout({
@@ -7,10 +8,13 @@ export default function userLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className="main-background min-h-screen  px-4">
-  
+   <ReactQueryProvider>
+      <main className="main-background min-h-screen ">
         {children}
-        <AppBar/>
-    </main>
+        <AppBar />
+      </main>
+    </ReactQueryProvider>
   );
 }
+
+

@@ -1,57 +1,29 @@
 
-"use client"
-import { useState } from "react";
-import  CreatePlanStep  from "@/src/components/modules/workout/CreatePlanStep";
-import  AddExercisesStep  from "@/src/components/modules/workout/AddExercisesStep";
-import { ProgressBar } from "@/src/components/modules/workout/ProgressBar";
+"use client";
+
+import CreatePlanStep from "@/src/components/modules/workout/CreatePlanStep";
+import AddExercisesStep from "@/src/components/modules/workout/AddExercisesStep";
+import CreateDaysStep from "@/src/components/modules/workout/CreateDaysStep";
 import { Swords, Sparkles } from "lucide-react";
-import { CreateDaysStep, WorkoutDay } from "@/src/components/modules/workout/CreateDaysStep";
+import { Card } from "@/src/components/ui/card";
+import { ProgressBar } from "@/src/components/ui/ProgressBar";
+import { WorkoutBuilderProvider, useWorkoutBuilder } from "@/src/context/WorkoutBuilderContext";
 
-interface WorkoutPlan {
-  name: string;
-  description: string;
-}
-
-const Index = () => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [plan, setPlan] = useState<WorkoutPlan | null>(null);
-  const [days, setDays] = useState<WorkoutDay[]>([]);
-
-  const handlePlanCreate = async (data: WorkoutPlan) => {
-    await simulateDataFetch();
-    setPlan(data);
-    setCurrentStep(2);
-  };
-
-  const handleDaysCreate = (createdDays: WorkoutDay[]) => {
-    setDays(createdDays);
-    setCurrentStep(3);
-  };
-
-  const handleExercisesComplete = (exercises: Record<string, unknown[]>) => {
-    console.log("Final Workout Plan:", {
-      plan,
-      days,
-      exercises,
-    });
-    // Could reset or show completion screen
-  };
-
-  // Placeholder for future data fetching
-  const simulateDataFetch = async () => {
-    return new Promise((resolve) => setTimeout(resolve, 500));
-  };
+// Separate component to use the context
+function WorkoutBuilderContent() {
+  const { state } = useWorkoutBuilder();
+  const { currentStep } = state;
 
   return (
-    <main className="min-h-screen bg-background relative overflow-hidden text-foreground">
+    <main className="min-h-screen relative overflow-hidden text-foreground">
       {/* Background Effects */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/5 rounded-full blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-transparent to-background/80" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,var(--tw-gradient-stops))] from-transparent via-transparent to-background/80" />
       </div>
 
-      <div className="relative z-10 container max-w-2xl mx-auto px-4 py-8 sm:py-12">
+      <div className="relative z-10 container max-w-2xl mx-auto md:px-4 py-8 sm:py-12">
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 animate-slide-up">
           <div className="inline-flex items-center gap-2 mb-4">
@@ -70,30 +42,19 @@ const Index = () => {
           </p>
         </header>
 
-        {/* Progress Bar */}
-        <div className="mb-8 sm:mb-10">
-          <ProgressBar currentStep={currentStep} totalSteps={3} />
-        </div>
+        <Card className="p-6  animate-slide-up">
+          {/* Progress Bar */}
+          <div className="mb-8 sm:mb-10">
+            <ProgressBar currentStep={currentStep} totalSteps={3} />
+          </div>
 
-        {/* Step Content */}
-        <section>
-          {currentStep === 1 && <CreatePlanStep onSubmit={handlePlanCreate} />}
-
-          {currentStep === 2 && (
-            <CreateDaysStep
-              onSubmit={handleDaysCreate}
-              onBack={() => setCurrentStep(1)}
-            />
-          )}
-
-          {currentStep === 3 && (
-            <AddExercisesStep
-              days={days}
-              onComplete={handleExercisesComplete}
-              onBack={() => setCurrentStep(2)}
-            />
-          )}
-        </section>
+          {/* Step Content */}
+          <section>
+            {currentStep === 1 && <CreatePlanStep />}
+            {currentStep === 2 && <CreateDaysStep />}
+            {currentStep === 3 && <AddExercisesStep />}
+          </section>
+        </Card>
 
         {/* Footer */}
         <footer className="mt-12 text-center">
@@ -104,6 +65,13 @@ const Index = () => {
       </div>
     </main>
   );
-};
+}
 
-export default Index;
+// Main exported component with provider
+export default function WorkoutBuilderPage() {
+  return (
+    <WorkoutBuilderProvider>
+      <WorkoutBuilderContent />
+    </WorkoutBuilderProvider>
+  );
+}

@@ -29,7 +29,7 @@ export const ProgressBar = ({ currentStep, totalSteps }: ProgressBarProps) => {
         </div>
         <div className="xp-bar h-3">
           <div
-            className="xp-bar-fill"
+            className="bg-primary h-3 xp-bar-fill transition-all duration-500 ease-in-out rounded-full"
             style={{ width: `${Math.max(progress, 5)}%` }}
           />
         </div>

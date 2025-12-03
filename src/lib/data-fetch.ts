@@ -1,14 +1,8 @@
-import { cookies } from "next/headers";
+import { deleteCookie, getCookie, persistTokens } from '@/src/services/auth/tokenHandlers';
 
 const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || "http://localhost:5000/api";
 const MAX_AUTH_RETRY = 1;
 
-const AUTH_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
-  path: "/",
-};
 
 type TokenEnvelope = {
   tokens?: {
@@ -62,8 +56,8 @@ const normalizeHeaders = (headers?: HeadersInit): Record<string, string> => {
 };
 
 const attachAuthHeader = async (headers?: HeadersInit) => {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
+  const accessToken = await getCookie("accessToken");
+  console.log(accessToken,'tokens');
   const normalized = normalizeHeaders(headers);
 
   if (accessToken && !normalized.Authorization) {
@@ -74,8 +68,7 @@ const attachAuthHeader = async (headers?: HeadersInit) => {
 };
 
 const refreshTokens = async () => {
-  const cookieStore = await cookies();
-  const refreshToken = cookieStore.get("refreshToken")?.value;
+  const refreshToken = await getCookie("refreshToken");
 
   if (!refreshToken) {
     return false;
@@ -91,26 +84,18 @@ const refreshTokens = async () => {
   const result = await response.json().catch(() => null);
 
   if (!response.ok || !result?.success) {
-    cookieStore.delete("accessToken");
-    cookieStore.delete("refreshToken");
+    deleteCookie("accessToken");
+    deleteCookie("refreshToken");
     return false;
   }
 
-  const { accessToken, refreshToken: newRefreshToken } = extractTokens(result);
+  const { accessToken } = extractTokens(result);
 
   if (accessToken) {
-    cookieStore.set("accessToken", accessToken, {
-      ...AUTH_COOKIE_OPTIONS,
-      maxAge: 60 * 60,
-    });
+await persistTokens(accessToken)
   }
 
-  if (newRefreshToken) {
-    cookieStore.set("refreshToken", newRefreshToken, {
-      ...AUTH_COOKIE_OPTIONS,
-      maxAge: 60 * 60 * 24 * 30,
-    });
-  }
+
 
   return true;
 };
@@ -121,10 +106,16 @@ const serverFetchHelper = async (
   attempt = 0,
 ): Promise<Response> => {
   const { headers, ...restOptions } = options;
-
+  const accessToken = await getCookie("accessToken");
+  console.log(accessToken,'tokens');
   const response = await fetch(`${BACKEND_API_URL}${endpoint}`, {
 
-    headers: await attachAuthHeader(headers),
+   
+     headers: {
+      ... await attachAuthHeader(headers),
+      Cookie: `accessToken=${accessToken}`,
+    },
+credentials: "include",  
     ...restOptions,
   });
 

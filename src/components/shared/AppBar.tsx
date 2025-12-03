@@ -12,7 +12,7 @@ export type INavItem = {
 
 
 const navItems:INavItem[] = [
-  { href: '/', icon: "Home", label: 'Home' },
+  { href: '/user/home', icon: "Home", label: 'Home' },
   { href: '/trips', icon: "Zap", label: 'Trips' },
   { href: '/map', icon: "Map", label: 'Map' },
   { href: '/user/dashboard', icon: "ShoppingCart", label: 'Shop' },

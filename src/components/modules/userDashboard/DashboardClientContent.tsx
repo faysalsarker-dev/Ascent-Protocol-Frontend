@@ -309,7 +309,7 @@ export default function DashboardClient({ initialData }: DashboardClientProps) {
                           <TabsTrigger 
                             key={day} 
                             value={day} 
-                            className="min-w-[80px] sm:min-w-[100px] text-xs sm:text-sm"
+                            className="min-w-20 sm:min-w-[100px] text-xs sm:text-sm"
                           >
                             {day.slice(0, 3)}
                           </TabsTrigger>

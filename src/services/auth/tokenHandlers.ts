@@ -65,7 +65,7 @@ export const extractTokens = async(payload: IToken) => {
 
 const AUTH_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
+  secure: true,
   sameSite: "lax" as const,
   path: "/",
 };

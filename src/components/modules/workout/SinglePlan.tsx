@@ -12,27 +12,49 @@ import RestDayCard from "@/src/components/modules/workout/RestDayCard";
 import { useGetAllPlansById } from "@/src/hooks/useWorkoutPlan";
 import { WorkoutSkeleton } from "./WorkoutSkeleton";
 import { WorkoutError } from "./WorkoutError";
-import { useState, useMemo } from "react";
+import { useState } from "react";
+
+interface Exercise {
+  id: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+interface WorkoutDay {
+  id: string;
+  name: string;
+  dayOfWeek: number;
+  isRestDay: boolean;
+  exercises: Exercise[];
+}
+
+interface WorkoutPlan {
+  name: string;
+  description: string;
+  isActive: boolean;
+  workoutDays: WorkoutDay[];
+}
 
 interface SinglePlanProps {
   id: string;
 }
 
 const SinglePlan = ({ id }: SinglePlanProps) => {
-  const { data, isLoading, isError, refetch } = useGetAllPlansById(id);
-
+  const { data: info, isLoading, isError, refetch } = useGetAllPlansById(id);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const today = new Date();
   const currentDayOfWeek = today.getDay();
 
+  const data = info?.data as WorkoutPlan | undefined;
   const workoutDays = data?.workoutDays ?? [];
 
-  const todayWorkoutIndex = useMemo(() => {
+
+  const todayWorkoutIndex = (() => {
     if (!workoutDays.length) return 0;
     const idx = workoutDays.findIndex((d) => d.dayOfWeek === currentDayOfWeek);
     return idx >= 0 ? idx : 0;
-  }, [workoutDays, currentDayOfWeek]);
+  })();
 
   const selectedIndex = activeIndex ?? todayWorkoutIndex;
 
@@ -41,10 +63,18 @@ const SinglePlan = ({ id }: SinglePlanProps) => {
 
   const selectedDay = workoutDays[selectedIndex];
 
+  // Safety check for selectedDay
+  if (!selectedDay) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+        No workout data available for this day.
+      </div>
+    );
+  }
+
   return (
     <div className="relative z-10 px-3 py-4 sm:p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
-
         {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: -20 }}
@@ -84,7 +114,6 @@ const SinglePlan = ({ id }: SinglePlanProps) => {
             </div>
           </div>
 
-          {/* Stats */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -101,9 +130,11 @@ const SinglePlan = ({ id }: SinglePlanProps) => {
             <div className="w-px h-3 sm:h-4 bg-border hidden sm:block" />
 
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
-                data.isActive ? "bg-primary animate-pulse" : "bg-muted"
-              }`} />
+              <span
+                className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
+                  data.isActive ? "bg-primary animate-pulse" : "bg-muted"
+                }`}
+              />
               <span className="text-xs sm:text-sm text-muted-foreground">
                 {data.isActive ? "Active" : "Inactive"}
               </span>
@@ -149,7 +180,7 @@ const SinglePlan = ({ id }: SinglePlanProps) => {
               <RestDayCard />
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
-                {selectedDay.exercises.map((exercise, idx) => (
+                {selectedDay.exercises?.map((exercise, idx) => (
                   <ExerciseCard key={exercise.id} exercise={exercise} index={idx} />
                 ))}
               </div>

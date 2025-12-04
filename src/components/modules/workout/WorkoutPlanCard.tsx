@@ -91,7 +91,7 @@ const WorkoutPlanCard: React.FC<WorkoutPlanCardProps> = ({ plan, index = 0 }) =>
                   </div>
 
 
-     <Link href={`/user/my-workout/${plan.id}`}>
+     <Link href={`/user/planDetails/${plan.id}`}>
             <Button
               className={`w-full group/btn ${
                 plan.isActive ? "bg-primary/20 text-primary hover:bg-primary/30" : ""

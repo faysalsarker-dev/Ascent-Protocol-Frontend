@@ -1,5 +1,6 @@
 "use client";
 import TodoList from "@/src/components/modules/home/TodoList";
+import TodayTask from "@/src/components/modules/today-task/TodayTask";
 import { useTodayWorkoutDay } from "@/src/hooks/useWorkoutPlan";
 
 const HomePage = () => {
@@ -11,6 +12,10 @@ const HomePage = () => {
         <div>
             
             <TodoList/>
+
+
+
+            <TodayTask/>
         </div>
     );
 };

@@ -96,7 +96,7 @@ export function useCreateExercise(workoutDayId: string) {
 export function useTodayWorkoutDay() {
   return useQuery({
     queryKey: ["today-workout-day"],
-    queryFn: () => getAllWorkoutPlans(),
+    queryFn: () => getTodayWorkoutDay(),
   });
 }
 

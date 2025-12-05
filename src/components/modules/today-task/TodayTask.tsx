@@ -11,6 +11,7 @@ import { TaskCard } from '@/src/components/modules/today-task/TaskCard';
 import { RestDayDisplay } from '@/src/components/modules/today-task/RestDayDisplay';
 import { ExerciseDrawer } from '@/src/components/modules/today-task/ExerciseDrawer';
 import { Exercise, getRandomSystemMessage, WorkoutDay } from '@/src/types/workout';
+import { useTodayWorkoutDay } from '@/src/hooks/useWorkoutPlan';
 
 // Sample workout data
 const sampleWorkoutDay: WorkoutDay = {
@@ -55,6 +56,11 @@ const sampleWorkoutDay: WorkoutDay = {
 };
 
 const TodayTask = () => {
+
+    const { data, isLoading, isError } = useTodayWorkoutDay();
+
+// const workoutDay = data?.data || []
+
   const [workoutDay] = useState<WorkoutDay>(sampleWorkoutDay);
   const [completedExercises, setCompletedExercises] = useState<Set<string>>(new Set());
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
@@ -68,10 +74,7 @@ const TodayTask = () => {
   }, [completedExercises, workoutDay.exercises.length]);
 
 
-  const progress_1 = ()=>{
-    if(workoutDay.exercises.length ===0) return 0;
-    return (completedExercises.size / workoutDay.exercises.length) *100;
-  }
+
   const handleExerciseClick = (exercise: Exercise) => {
     setSelectedExercise(exercise);
     setIsDrawerOpen(true);

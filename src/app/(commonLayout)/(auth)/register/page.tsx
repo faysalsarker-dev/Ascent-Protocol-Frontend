@@ -1,22 +1,19 @@
 import  RegisterStepper  from "@/src/components/modules/auth/RegisterStepper";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+
 
 const RegisterPage = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+    <div className=" bg-background min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-2">
 
-      {/* SOLO LEVELING BACK AURA */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black via-[#0a0a0f] to-black" />
+      {/* <div className="absolute inset-0 bg-linear-to-b from-black via-[#0a0a0f] to-black" /> */}
       
 
-      {/* Back Button */}
-      <Link href="/" className="absolute top-6 left-6 flex items-center gap-2 text-muted-foreground hover:text-primary transition">
-        <ArrowLeft className="w-5 h-5" />
-        <span className="font-medium">Back</span>
-      </Link>
+         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 w-[280px] h-[280px] rounded-full bg-[#6726E3]/30 blur-[90px]" />
 
-      <RegisterStepper />
+  
+        <RegisterStepper />
+          <div className="absolute inset-0 bg-linear-to-t from-[#5A1BCF] via-transparent to-transparent opacity-90 -z-10" />
+
     </div>
   );
 };

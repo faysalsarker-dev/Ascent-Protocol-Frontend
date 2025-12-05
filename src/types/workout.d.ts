@@ -36,7 +36,7 @@ export interface WorkoutDay {
   weeklyPlanId: string;
   dayOfWeek: number; // 1=Monday, 7=Sunday
   name: string;
-  isRestDay: boolean;
+  isRestDay?: boolean;
   notes?: string | null;
   order: number;
   exercises?: PlannedExercise[];

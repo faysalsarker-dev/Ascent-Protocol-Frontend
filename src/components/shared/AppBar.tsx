@@ -13,10 +13,10 @@ export type INavItem = {
 
 const navItems:INavItem[] = [
   { href: '/user/home', icon: "Home", label: 'Home' },
-  { href: '/trips', icon: "Zap", label: 'Trips' },
-  { href: '/map', icon: "Map", label: 'Map' },
-  { href: '/user/dashboard', icon: "ShoppingCart", label: 'Shop' },
-  { href: '/settings', icon: "Settings", label: 'Settings' },
+  { href: '/user/my-workout', icon: "Home", label: 'Home' },
+  { href: '/user/dashboard', icon: "Home", label: 'Home' },
+  { href: '/user/profile', icon: "Home", label: 'Home' },
+  
 ];
 
 

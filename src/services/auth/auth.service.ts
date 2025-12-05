@@ -26,7 +26,6 @@ export const registerUser = async (data: {
     password: string;
 }): Promise<RegisterActionResult> => {
     try {
-        
         const res = await dataFetch.post("/auth/register", {
             body: JSON.stringify(data),
             headers: {
@@ -36,21 +35,24 @@ export const registerUser = async (data: {
 
         const result = await res.json().catch(() => null);
 
-        if (!res.ok) {
+ if (!res.ok) {
             return {
                 success: false,
-                message: result?.message || "Registration failed. Please try again.",
-                errors: result?.errors,
+                // FIX: Access error.message instead of message
+                message: result?.error?.message || result?.message || "Registration failed. Please try again.",
+                errors: result?.errors || result?.error?.details,
             };
         }
 
         if (result && result.success === false) {
             return {
                 success: false,
-                message: result?.message || "Registration failed. Please try again.",
-                errors: result?.errors,
+                // FIX: Access error.message instead of message
+                message: result?.error?.message || result?.message || "Registration failed. Please try again.",
+                errors: result?.errors || result?.error?.details,
             };
         }
+
 
         const { accessToken, refreshToken } = await extractTokens(result);
             await persistTokens(accessToken, refreshToken);
@@ -80,46 +82,27 @@ export const registerUser = async (data: {
 // Update extra profile fields - handles FormData with file upload
 export async function updateProfileExtras(formData: FormData): Promise<UpdateProfileResult> {
     try {
-        const uploadFormData = new FormData();
-
-        // Extract and prepare data object
-        const data: Record<string, any> = {};
-        
-        const bio = formData.get('bio');
-        const dateOfBirth = formData.get('dateOfBirth');
-        const gender = formData.get('gender');
-        const weight = formData.get('weight');
-        const height = formData.get('height');
-
-        if (bio) data.bio = bio;
-        if (dateOfBirth) data.dateOfBirth = dateOfBirth;
-        if (gender) data.gender = gender;
-        if (weight) data.weight = parseFloat(weight as string);
-        if (height) data.height = parseFloat(height as string);
-
-        // Add the data as JSON string
-        uploadFormData.append('data', JSON.stringify(data));
-
-        // Add the avatar file if it exists
-        const avatar = formData.get('avatar');
-        if (avatar && avatar instanceof File && avatar.size > 0) {
-            uploadFormData.append('file', avatar);
-        }
-
-        const response = await dataFetch.put(`/users/update-my-profile`, {
-            body: uploadFormData,
+console.log('update functions',formData);
+        const response = await dataFetch.put(`/auth/update-my-profile`, {
+            body: formData, 
         });
 
         const result = await response.json();
 
-        if (!result.success) {
+        if (!response.ok) {
             return {
                 success: false,
-                message: result?.message || "Profile update failed.",
+                message: result?.error?.message || result?.message || "Profile update failed. Please try again.",
             };
         }
 
-        // Revalidate user info cache
+        if (result && result.success === false) {
+            return {
+                success: false,
+                message: result?.error?.message || result?.message || "Profile update failed. Please try again.",
+            };
+        }
+
         revalidateTag("user-info", {});
 
         return {
@@ -139,58 +122,102 @@ export async function updateProfileExtras(formData: FormData): Promise<UpdatePro
     }
 }
 
+
 // General profile update function (existing one, improved)
-export async function updateMyProfile(formData: FormData): Promise<UpdateProfileResult> {
-    try {
-        const uploadFormData = new FormData();
+export async function updateMyProfile(data: FormData): Promise<UpdateProfileResult> {
+  try {
+    const response = await dataFetch.patch(`/auth/update-my-profile`, {
+      body: data,        
+   
+    });
 
-        // Get all form fields except the file
-        const data: any = {};
-        formData.forEach((value, key) => {
-            if (key !== 'file' && value) {
-                data[key] = value;
-            }
-        });
+    const result = await response.json();
 
-        // Add the data as JSON string
-        uploadFormData.append('data', JSON.stringify(data));
+    if (!result.success) {
+      return {
+        success: false,
+        message: result?.message || "Update failed.",
+      };
+    }
 
-        // Add the file if it exists
-        const file = formData.get('file');
-        if (file && file instanceof File && file.size > 0) {
-            uploadFormData.append('file', file);
-        }
+    revalidateTag("user-info",{});
 
-        const response = await dataFetch.patch(`/user/update-my-profile`, {
-            body: uploadFormData,
-        });
+    return {
+      success: true,
+      message: result?.message || "Profile updated successfully.",
+      data: result?.data,
+    };
 
-        const result = await response.json();
+  } catch (error: any) {
+    console.error("Update profile error:", error);
+    return {
+      success: false,
+      message:
+        process.env.NODE_ENV === "development"
+          ? error.message
+          : "Something went wrong",
+    };
+  }
+}
 
-        if (!result.success) {
+export async function updatePassword(data:{oldPassword:string,newPassword:string}): Promise<UpdateProfileResult> {
+  try {
+    const response = await dataFetch.patch(`/auth/change-password`, {
+         body: JSON.stringify(data),
+            headers: {
+                "Content-Type": "application/json",
+            },      
+   
+    });
+
+    const result = await response.json();
+
+     if (!result.ok) {
             return {
                 success: false,
-                message: result?.message || "Update failed.",
+                message: result?.error?.message || result?.message || "Registration failed. Please try again.",
             };
         }
 
-        revalidateTag("user-info", {});
-        
-        return {
-            success: true,
-            message: result?.message || "Profile updated successfully.",
-            data: result?.data,
-        };
+        if (result && result.success === false) {
+            return {
+                success: false,
+                message: result?.error?.message || result?.message || "Registration failed. Please try again.",
+            };
+        }
 
-    } catch (error: any) {
-        console.error('Update profile error:', error);
-        return {
-            success: false,
-            message: process.env.NODE_ENV === 'development' 
-                ? error.message 
-                : 'Something went wrong'
-        };
-    }
+    revalidateTag("user-info",{});
+
+    return {
+      success: true,
+      message: result?.message || "Profile updated successfully.",
+      data: result?.data,
+    };
+
+  } catch (error: any) {
+    console.error("Update profile error:", error);
+    return {
+      success: false,
+      message:
+        process.env.NODE_ENV === "development"
+          ? error.message
+          : "Something went wrong",
+    };
+  }
 }
 
+
+
+export async function getMe() {
+  try {
+    const response = await dataFetch.get("/auth/me", {
+      next: { tags: ["user-info"] }, 
+    //   next: { tags: ["user-info"], revalidate: 3600 }, 
+    });
+    return response.json();
+  } catch (error) {
+    console.error("Get today workout error:", error);
+    throw error;
+  }
+}
 

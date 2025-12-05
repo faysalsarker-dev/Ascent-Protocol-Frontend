@@ -11,9 +11,9 @@ import { useMemo } from "react";
 
 interface RegisterStepExtrasProps {
   onSubmit: (data: ExtrasForm) => void | Promise<void>;
-  onSkip: () => void;
-  onBack: () => void;
-  loading: boolean;
+  onSkip?: () => void;
+  onBack?: () => void;
+  loading?: boolean;
   errorMessage?: string | null;
 }
 

@@ -20,11 +20,9 @@ export default function RegisterStepper() {
   const [basicData, setBasicData] = useState<RegisterBasicForm | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
 
-  /**
-   * Handle basic registration form submission
-   * Validates data, calls API, and moves to extras step
-   */
   const handleBasicSubmit = async (data: RegisterBasicForm) => {
+    if(step !== "basic") return;
+    console.log('call register');
     setSubmissionError(null);
     setState("registering");
 
@@ -34,7 +32,6 @@ export default function RegisterStepper() {
         email: data.email,
         password: data.password,
       };
-
       const registerResult = await registerUser(payload);
 
       if (!registerResult.success) {
@@ -69,51 +66,63 @@ export default function RegisterStepper() {
    * Handle extras form submission
    * Updates profile with additional information
    */
-  const handleExtrasSubmit = async (extrasData: ExtrasForm) => {
-    // Check if there's any data to update
-    const hasExtrasData = 
-      extrasData.avatar || 
-      extrasData.bio || 
-      extrasData.dateOfBirth || 
-      extrasData.gender || 
-      extrasData.weight || 
-      extrasData.height;
+const handleExtrasSubmit = async (extrasData: ExtrasForm) => {
+    console.log('call updates');
+  const hasExtrasData = 
+    extrasData.avatar || 
+    extrasData.bio || 
+    extrasData.dateOfBirth || 
+    extrasData.gender || 
+    extrasData.weight || 
+    extrasData.height;
 
-    if (!hasExtrasData) {
-      // No extras data, just redirect to dashboard
-      setState("completed");
-      router.push("/dashboard");
-      return;
+  if (!hasExtrasData) {
+    setState("completed");
+    router.push("/dashboard");
+    return;
+  }
+
+  setState("updating");
+
+  try {
+    const formData = new FormData();
+    
+    // Build data object for non-file fields
+    const data: Record<string, any> = {};
+    if (extrasData.bio) data.bio = extrasData.bio;
+    if (extrasData.dateOfBirth) data.dateOfBirth = extrasData.dateOfBirth;
+    if (extrasData.gender) data.gender = extrasData.gender;
+    if (extrasData.weight) data.weight = extrasData.weight;
+    if (extrasData.height) data.height = extrasData.height;
+
+    // Append as JSON string with key 'data' (for Multer)
+    if (Object.keys(data).length > 0) {
+      formData.append('data', JSON.stringify(data));
+    }
+    
+    if (extrasData.avatar) {
+      formData.append('file', extrasData.avatar);
     }
 
-    setState("updating");
-
-    try {
-      const formData = new FormData();
-      
-      if (extrasData.avatar) formData.append('avatar', extrasData.avatar);
-      if (extrasData.bio) formData.append('bio', extrasData.bio);
-      if (extrasData.dateOfBirth) formData.append('dateOfBirth', extrasData.dateOfBirth);
-      if (extrasData.gender) formData.append('gender', extrasData.gender);
-      if (extrasData.weight) formData.append('weight', extrasData.weight.toString());
-      if (extrasData.height) formData.append('height', extrasData.height.toString());
-
-      const updateResult = await updateProfileExtras(formData);
-      
-      if (!updateResult.success) {
-        toast.warning("Some profile details couldn't be saved. You can update them later in settings.");
-      } else {
-        toast.success("Profile enhanced successfully! +50 XP");
-      }
-      
-    } catch (error) {
-      console.error("Profile update error:", error);
-      toast.warning("Profile details couldn't be saved. You can update them later in settings.");
-    } finally {
-      setState("completed");
-      router.push("/dashboard");
+    const updateResult = await updateProfileExtras(formData);
+    console.log(updateResult);
+    
+    if (!updateResult.success) {
+      toast.warning("Some profile details couldn't be saved. You can update them later in settings.");
+    } else {
+      toast.success("Profile enhanced successfully! +50 XP");
     }
-  };
+    
+  } catch (error) {
+    console.error("Profile update error:", error);
+    toast.warning("Profile details couldn't be saved. You can update them later in settings.");
+  } 
+  
+  // finally {
+  //   setState("completed");
+  //   router.push("/dashboard");
+  // }
+};
 
   /**
    * Handle skip extras step
@@ -151,14 +160,11 @@ export default function RegisterStepper() {
   const isLoading = state === "registering" || state === "updating";
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900/20 to-gray-900 flex items-center justify-center p-4">
+    <>
       <div className="relative w-full max-w-xl">
-        {/* Glow Effects */}
-        <div className="absolute -top-10 -left-10 w-60 h-60 bg-purple-500/20 blur-3xl rounded-full pointer-events-none" />
-        <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-blue-500/20 blur-3xl rounded-full pointer-events-none" />
-        
+
         {/* Card */}
-        <div className="relative bg-gray-900/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-8 md:p-12 shadow-2xl">
+        <div className="relative  backdrop-blur-xl border border-purple-500/20 rounded-2xl p-8 md:p-12 shadow-2xl">
           {/* Progress Bar */}
           <div className="space-y-3 mb-8">
             <div className="flex justify-between items-center text-sm">
@@ -228,6 +234,6 @@ export default function RegisterStepper() {
           </AnimatePresence>
         </div>
       </div>
-    </div>
+    </>
   );
 }

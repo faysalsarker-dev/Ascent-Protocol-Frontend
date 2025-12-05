@@ -54,7 +54,6 @@ export function RegisterStepBasic({
         control={control}
         placeholder="Enter your name"
         required
-        disabled={isProcessing}
       />
 
       <FormInput
@@ -64,7 +63,6 @@ export function RegisterStepBasic({
         type="email"
         placeholder="your@email.com"
         required
-        disabled={isProcessing}
       />
 
       <div className="relative">
@@ -75,13 +73,12 @@ export function RegisterStepBasic({
           type={showPassword ? 'text' : 'password'}
           placeholder="Create a strong password"
           required
-          disabled={isProcessing}
         />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
           disabled={isProcessing}
-          className="absolute right-3 top-[42px] text-gray-400 hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="absolute right-3 top-[35px] text-gray-400 hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           aria-label={showPassword ? "Hide password" : "Show password"}
         >
           {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}

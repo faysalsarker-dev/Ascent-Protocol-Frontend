@@ -125,19 +125,7 @@ export const RestDayDisplay = () => {
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mt-4 h-2 bg-muted rounded-full overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-secondary to-primary rounded-full"
-            initial={{ width: '0%' }}
-            animate={{ width: '100%' }}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-        </div>
+     
       </motion.div>
     </motion.div>
   );

@@ -1,6 +1,7 @@
 import { deleteCookie, getCookie, persistTokens } from '@/src/services/auth/tokenHandlers';
 
-const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || "http://localhost:5000/api";
+// const BACKEND_API_URL = process.env.NEXT_PUBLIC_BASE_API_URL || "http://localhost:5000/api";
+const BACKEND_API_URL = "http://localhost:5000/api";
 const MAX_AUTH_RETRY = 1;
 
 
@@ -108,6 +109,8 @@ const serverFetchHelper = async (
 ): Promise<Response> => {
   const { headers, ...restOptions } = options;
   const accessToken = await getCookie("accessToken");
+
+  console.log(BACKEND_API_URL,'BACKEND_API_URL');
   const response = await fetch(`${BACKEND_API_URL}${endpoint}`, {
 
    

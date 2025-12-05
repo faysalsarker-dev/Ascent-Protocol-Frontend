@@ -1,12 +1,12 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { LoginForm } from "@/src/components/modules/auth/LoginForm";
+import { Card } from "@/src/components/ui/card";
 
 const LoginPage = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-black">
-      <div className="absolute inset-0 bg-linear-to-b from-black via-[#0f0c1d] to-black" />
-      <div className="absolute inset-0 opacity-40 blur-3xl bg-[radial-gradient(circle_at_top,rgba(140,89,255,0.4),transparent_55%)]" />
+     
 
       <Link
         href="/"
@@ -18,9 +18,9 @@ const LoginPage = () => {
 
       <div className="relative z-10 w-full px-4">
         <div className="mx-auto max-w-lg">
-          <div className="bg-gray-900/80 border border-purple-500/20 rounded-3xl p-8 md:p-10 shadow-2xl backdrop-blur-xl">
+          <Card className="bg-gray-900/80 border border-purple-500/20 rounded-3xl p-8 md:p-10 shadow-2xl backdrop-blur-xl">
             <LoginForm />
-          </div>
+          </Card>
         </div>
       </div>
     </div>

@@ -44,13 +44,29 @@ export const loginUser = async (formData: FormData): Promise<AuthActionResult> =
 
     const result = await response.json().catch(() => null);
 
-    if (!response.ok || !result?.success) {
-      return {
-        success: false,
-        message: result?.message || "Login failed. Please try again.",
-        errors: result?.errors,
-      };
-    }
+
+
+ if (!response.ok) {
+            return {
+                success: false,
+                // FIX: Access error.message instead of message
+                message: result?.error?.message || result?.message || "Login failed. Please try again.",
+                errors: result?.errors || result?.error?.details,
+            };
+        }
+
+        if (result && result.success === false) {
+            return {
+                success: false,
+                // FIX: Access error.message instead of message
+                message: result?.error?.message || result?.message || "Login failed. Please try again.",
+                errors: result?.errors || result?.error?.details,
+            };
+        }
+
+
+
+
 
     const { accessToken, refreshToken } = await extractTokens(result);
     await persistTokens(accessToken, refreshToken);

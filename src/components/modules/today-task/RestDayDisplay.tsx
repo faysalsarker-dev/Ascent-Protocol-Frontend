@@ -1,27 +1,27 @@
 import { motion } from 'framer-motion';
-import { BatteryCharging, Sparkles, Moon } from 'lucide-react';
+import { BatteryCharging, Moon, Sparkles } from 'lucide-react';
 
 export const RestDayDisplay = () => {
   return (
     <motion.div
-      className="flex flex-col items-center justify-center py-16"
+      className="flex flex-col items-center justify-center py-12"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
     >
-      {/* Main Icon Container */}
+      {/* Icon Container */}
       <div className="relative mb-8">
-        {/* Outer Aura Rings */}
-        {[...Array(3)].map((_, i) => (
+        {/* Aura Rings */}
+        {[...Array(2)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute inset-0 rounded-full border border-secondary/30"
+            className="absolute inset-0 rounded-full border border-accent/20"
             style={{
-              transform: `scale(${1.5 + i * 0.3})`,
+              transform: `scale(${1.4 + i * 0.3})`,
             }}
             animate={{
-              scale: [1.5 + i * 0.3, 1.7 + i * 0.3, 1.5 + i * 0.3],
-              opacity: [0.3, 0.6, 0.3],
+              scale: [1.4 + i * 0.3, 1.6 + i * 0.3, 1.4 + i * 0.3],
+              opacity: [0.2, 0.4, 0.2],
             }}
             transition={{
               duration: 3,
@@ -34,12 +34,12 @@ export const RestDayDisplay = () => {
 
         {/* Central Icon */}
         <motion.div
-          className="rest-day-icon w-32 h-32 rounded-full bg-linear-to-br from-secondary/30 to-primary/20 flex items-center justify-center"
+          className="w-24 h-24 rounded-full bg-gradient-to-br from-accent/20 to-primary/10 flex items-center justify-center border border-accent/30"
           animate={{
             boxShadow: [
-              '0 0 30px hsl(var(--secondary) / 0.4)',
-              '0 0 60px hsl(var(--secondary) / 0.6)',
-              '0 0 30px hsl(var(--secondary) / 0.4)',
+              '0 0 20px hsl(var(--accent) / 0.2)',
+              '0 0 40px hsl(var(--accent) / 0.3)',
+              '0 0 20px hsl(var(--accent) / 0.2)',
             ],
           }}
           transition={{
@@ -50,8 +50,8 @@ export const RestDayDisplay = () => {
         >
           <motion.div
             animate={{
-              rotate: [0, 10, -10, 0],
-              scale: [1, 1.1, 1],
+              rotate: [0, 5, -5, 0],
+              scale: [1, 1.05, 1],
             }}
             transition={{
               duration: 4,
@@ -59,12 +59,12 @@ export const RestDayDisplay = () => {
               ease: 'easeInOut',
             }}
           >
-            <BatteryCharging className="w-16 h-16 text-secondary" />
+            <BatteryCharging className="w-10 h-10 text-accent" />
           </motion.div>
         </motion.div>
 
-        {/* Floating Particles */}
-        {[...Array(6)].map((_, i) => (
+        {/* Floating Sparkles */}
+        {[...Array(4)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute"
@@ -73,19 +73,19 @@ export const RestDayDisplay = () => {
               left: '50%',
             }}
             animate={{
-              x: [0, Math.cos(i * 60 * (Math.PI / 180)) * 80],
-              y: [0, Math.sin(i * 60 * (Math.PI / 180)) * 80],
+              x: [0, Math.cos(i * 90 * (Math.PI / 180)) * 50],
+              y: [0, Math.sin(i * 90 * (Math.PI / 180)) * 50],
               opacity: [0, 1, 0],
               scale: [0, 1, 0],
             }}
             transition={{
-              duration: 3,
-              delay: i * 0.5,
+              duration: 2.5,
+              delay: i * 0.4,
               repeat: Infinity,
               ease: 'easeOut',
             }}
           >
-            <Sparkles className="w-4 h-4 text-secondary" />
+            <Sparkles className="w-3 h-3 text-accent" />
           </motion.div>
         ))}
       </div>
@@ -97,35 +97,30 @@ export const RestDayDisplay = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        <h2 className="font-display text-2xl font-bold text-glow-purple mb-2">
+        <h2 className="font-display text-xl font-bold text-accent mb-2">
           REST DAY
         </h2>
-        <p className="text-lg text-secondary/80 tracking-wider uppercase">
+        <p className="text-sm text-muted-foreground font-mono uppercase tracking-wider">
           System Recharging
         </p>
       </motion.div>
 
       {/* Status Panel */}
       <motion.div
-        className="mt-8 system-panel max-w-xs w-full"
-        initial={{ opacity: 0, scale: 0.9 }}
+        className="mt-6 p-4 rounded-xl bg-accent/5 border border-accent/20 max-w-xs w-full"
+        initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.8 }}
-        style={{
-          borderColor: 'hsl(var(--secondary) / 0.3)',
-        }}
       >
         <div className="flex items-center gap-3 text-sm">
-          <Moon className="w-5 h-5 text-secondary" />
+          <Moon className="w-5 h-5 text-accent" />
           <div>
-            <p className="text-foreground">Recovery Mode Active</p>
-            <p className="text-muted-foreground text-xs">
+            <p className="text-foreground font-medium">Recovery Mode Active</p>
+            <p className="text-muted-foreground text-xs font-mono">
               Muscles regenerating • Energy restored
             </p>
           </div>
         </div>
-
-     
       </motion.div>
     </motion.div>
   );

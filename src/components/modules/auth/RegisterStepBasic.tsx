@@ -1,13 +1,21 @@
-"use client";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useState } from "react";
+import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
+import { motion } from "framer-motion";
+import { Input } from "@/src/components/ui/input";
+import { Button } from "@/src/components/ui/button";
+import { Label } from "@/src/components/ui/label";
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { registerSchemaBasic, RegisterBasicForm } from '@/src/schemas/register.schema';
-import { useState } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
-import { FormInput } from '@/src/components/ui/FormInput';
-import { FormButton } from '@/src/components/ui/FormButton';
-import { motion } from 'framer-motion';
+// Schema
+const registerSchemaBasic = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export type RegisterBasicForm = z.infer<typeof registerSchemaBasic>;
 
 interface RegisterStepBasicProps {
   onNext: (data: RegisterBasicForm) => void | Promise<void>;
@@ -27,13 +35,13 @@ export function RegisterStepBasic({
   const { 
     control, 
     handleSubmit, 
-    formState: { isSubmitting } 
+    formState: { errors, isSubmitting } 
   } = useForm<RegisterBasicForm>({
     resolver: zodResolver(registerSchemaBasic),
     defaultValues: defaultValues || {
-      name: '',
-      email: '',
-      password: '',
+      name: "",
+      email: "",
+      password: "",
     },
   });
 
@@ -48,41 +56,86 @@ export function RegisterStepBasic({
       onSubmit={handleSubmit(onNext)}
       className="space-y-5"
     >
-      <FormInput
-        name="name"
-        label="Full Name"
-        control={control}
-        placeholder="Enter your name"
-        required
-      />
-
-      <FormInput
-        name="email"
-        label="Email"
-        control={control}
-        type="email"
-        placeholder="your@email.com"
-        required
-      />
-
-      <div className="relative">
-        <FormInput
-          name="password"
-          label="Password"
+      {/* Name Field */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+          <User className="w-4 h-4 text-primary" />
+          Hunter Name
+        </Label>
+        <Controller
+          name="name"
           control={control}
-          type={showPassword ? 'text' : 'password'}
-          placeholder="Create a strong password"
-          required
+          render={({ field }) => (
+            <Input
+              {...field}
+              placeholder="Enter your name"
+              disabled={isProcessing}
+              className="bg-background/50 border-border/50 focus:border-primary/50"
+            />
+          )}
         />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          disabled={isProcessing}
-          className="absolute right-3 top-[35px] text-gray-400 hover:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          aria-label={showPassword ? "Hide password" : "Show password"}
-        >
-          {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-        </button>
+        {errors.name && (
+          <p className="text-xs text-destructive">{errors.name.message}</p>
+        )}
+      </div>
+
+      {/* Email Field */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+          <Mail className="w-4 h-4 text-primary" />
+          Email
+        </Label>
+        <Controller
+          name="email"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              type="email"
+              placeholder="your@email.com"
+              disabled={isProcessing}
+              className="bg-background/50 border-border/50 focus:border-primary/50"
+            />
+          )}
+        />
+        {errors.email && (
+          <p className="text-xs text-destructive">{errors.email.message}</p>
+        )}
+      </div>
+
+      {/* Password Field */}
+      <div className="space-y-2">
+        <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+          <Lock className="w-4 h-4 text-primary" />
+          Password
+        </Label>
+        <div className="relative">
+          <Controller
+            name="password"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                type={showPassword ? "text" : "password"}
+                placeholder="Create a strong password"
+                disabled={isProcessing}
+                className="bg-background/50 border-border/50 focus:border-primary/50 pr-10"
+              />
+            )}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            disabled={isProcessing}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
+        </div>
+        {errors.password && (
+          <p className="text-xs text-destructive">{errors.password.message}</p>
+        )}
       </div>
 
       {/* Error Message */}
@@ -90,20 +143,31 @@ export function RegisterStepBasic({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg"
+          className="p-3 bg-destructive/10 border border-destructive/50 rounded-lg"
         >
-          <p className="text-sm text-red-400 text-center">{errorMessage}</p>
+          <p className="text-sm text-destructive text-center font-mono">{errorMessage}</p>
         </motion.div>
       )}
 
-      <FormButton 
+      {/* Submit Button */}
+      <Button 
         type="submit" 
-        loading={isProcessing} 
-        className="w-full mt-6"
         disabled={isProcessing}
+        className="w-full mt-6 bg-primary hover:bg-primary/90 text-primary-foreground font-mono tracking-wide"
       >
-        {isProcessing ? 'Creating Account...' : 'Continue to Extras'}
-      </FormButton>
+        {isProcessing ? (
+          <span className="flex items-center gap-2">
+            <motion.span
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full"
+            />
+            INITIALIZING...
+          </span>
+        ) : (
+          "CONTINUE →"
+        )}
+      </Button>
     </motion.form>
   );
 }

@@ -1,26 +1,40 @@
 "use client";
-
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { z } from "zod";
+import { motion, AnimatePresence } from "framer-motion";
+import { Eye, EyeOff, ShieldCheck, Zap, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { 
+  GlitchText, 
+  ScanlineOverlay, 
+  DataStream, 
+  CornerBracket,
+  HexagonIcon,
+  StatusBadge
+} from "@/src/components/modules/today-task/GamifiedEffects";
+import { ParticleBackground } from "@/src/components/modules/today-task/ParticleBackground";
+import { Input } from "@/src/components/ui/input";
+import { Button } from "@/src/components/ui/button";
+import { Label } from "@/src/components/ui/label";
+import Link from "next/link";
 
-import { loginSchema, LoginFormValues } from "@/src/schemas/auth.schema";
-import { FormInput } from "@/src/components/ui/FormInput";
-import { FormButton } from "@/src/components/ui/FormButton";
-import { loginUser } from "@/src/services/auth/session.service";
+// Login Schema
+const loginSchema = z.object({
+  email: z.string().email("Invalid hunter identification format"),
+  password: z.string().min(6, "Security code must be at least 6 characters"),
+});
 
-export function LoginForm() {
-  const router = useRouter();
+type LoginFormValues = z.infer<typeof loginSchema>;
+
+const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
-    control,
+    register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormValues>({
@@ -31,85 +45,333 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = (values: LoginFormValues) => {
-    const formData = new FormData();
-    formData.append("email", values.email);
-    formData.append("password", values.password);
-
-    startTransition(async () => {
-      setServerError(null);
-      const result = await loginUser(formData);
-
-      if (!result.success) {
-        const message = result.message || "Login failed. Please try again.";
-        setServerError(message);
-        toast.error(message);
-        return;
-      }
-
-      toast.success(result.message || "Login successful!");
-      router.push("/user/dashboard");
-    });
+  const onSubmit = async (values: LoginFormValues) => {
+    setIsLoading(true);
+    setServerError(null);
+    
+    // Simulate API call - replace with actual login logic
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Simulated success - replace with actual auth
+      toast.success("Hunter authentication successful!");
+      navigate("/today");
+    } catch (error) {
+      const message = "Authentication failed. Verify your credentials.";
+      setServerError(message);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="w-full max-w-md space-y-6">
-      <div className="text-center space-y-2">
-        <div className="inline-flex items-center justify-center rounded-full bg-primary/10 p-3">
-          <ShieldCheck className="w-6 h-6 text-primary" />
-        </div>
-        <h1 className="text-3xl font-bold text-white">Welcome back</h1>
-        <p className="text-gray-400">Enter your credentials to access your dashboard.</p>
-      </div>
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+      {/* Background Effects */}
+      <ParticleBackground />
+     
+  
+      
+      {/* Ambient Glow */}
+      <motion.div
+        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-primary/10 blur-3xl pointer-events-none"
+        animate={{
+          scale: [1, 1.3, 1],
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        <FormInput
-          name="email"
-          label="Email address"
-          control={control}
-          placeholder="you@example.com"
-          type="email"
-          required
-        />
-
-        <div className="relative">
-          <FormInput
-            name="password"
-            label="Password"
-            control={control}
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter your password"
-            required
+      {/* Main Content */}
+      <motion.div
+        className="relative z-10 w-full max-w-md mx-4"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
+        {/* Login Panel */}
+        <div className="relative bg-card/60 backdrop-blur-xl border border-primary/30 rounded-sm p-8 shadow-2xl">
+          {/* Corner Brackets */}
+          <CornerBracket position="tl" color="primary" />
+          <CornerBracket position="tr" color="primary" />
+          <CornerBracket position="bl" color="primary" />
+          <CornerBracket position="br" color="primary" />
+          
+          {/* Animated Border Glow */}
+          <motion.div
+            className="absolute inset-0 rounded-sm pointer-events-none"
+            style={{
+              boxShadow: "0 0 30px hsl(var(--primary) / 0.2), inset 0 0 30px hsl(var(--primary) / 0.05)"
+            }}
+            animate={{
+              boxShadow: [
+                "0 0 30px hsl(var(--primary) / 0.2), inset 0 0 30px hsl(var(--primary) / 0.05)",
+                "0 0 50px hsl(var(--primary) / 0.4), inset 0 0 50px hsl(var(--primary) / 0.1)",
+                "0 0 30px hsl(var(--primary) / 0.2), inset 0 0 30px hsl(var(--primary) / 0.05)",
+              ]
+            }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-3 top-[35px] text-gray-400 hover:text-gray-200 transition"
-            aria-label={showPassword ? "Hide password" : "Show password"}
+
+          {/* Header Section */}
+          <div className="text-center mb-8">
+            {/* Hexagon Icon */}
+            <motion.div 
+              className="flex justify-center mb-6"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+            >
+              <HexagonIcon icon={ShieldCheck} color="primary" size="lg" />
+            </motion.div>
+
+            {/* Title */}
+            <motion.h1
+              className="font-system text-3xl font-bold mb-2"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <GlitchText className="text-glow">REAWAKEN</GlitchText>
+            </motion.h1>
+            
+            <motion.p
+              className="text-muted-foreground text-sm tracking-wider"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              :: HUNTER AUTHENTICATION REQUIRED ::
+            </motion.p>
+
+            {/* Status Badge */}
+            <motion.div
+              className="flex justify-center mt-4"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.6 }}
+            >
+              <StatusBadge label="SYSTEM" value="STANDBY" color="primary" />
+            </motion.div>
+          </div>
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Email Field */}
+            <motion.div
+              className="space-y-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Label className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <Zap className="w-3 h-3 text-primary" />
+                Hunter ID
+              </Label>
+              <div className="relative">
+                <Input
+                  type="email"
+                  placeholder="hunter@system.com"
+                  className={`bg-background/60 border-primary/30 focus:border-primary focus:ring-primary/30 placeholder:text-muted-foreground/50 ${
+                    errors.email ? "border-destructive" : ""
+                  }`}
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <motion.div
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                  >
+                    <AlertTriangle className="w-4 h-4 text-destructive" />
+                  </motion.div>
+                )}
+              </div>
+              <AnimatePresence>
+                {errors.email && (
+                  <motion.p
+                    className="text-xs text-destructive flex items-center gap-1"
+                    initial={{ opacity: 0, y: -10, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: "auto" }}
+                    exit={{ opacity: 0, y: -10, height: 0 }}
+                  >
+                    <AlertTriangle className="w-3 h-3" />
+                    {errors.email.message}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Password Field */}
+            <motion.div
+              className="space-y-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <Label className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                <ShieldCheck className="w-3 h-3 text-primary" />
+                Security Code
+              </Label>
+              <div className="relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className={`bg-background/60 border-primary/30 focus:border-primary focus:ring-primary/30 pr-10 placeholder:text-muted-foreground/50 ${
+                    errors.password ? "border-destructive" : ""
+                  }`}
+                  {...register("password")}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <AnimatePresence>
+                {errors.password && (
+                  <motion.p
+                    className="text-xs text-destructive flex items-center gap-1"
+                    initial={{ opacity: 0, y: -10, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: "auto" }}
+                    exit={{ opacity: 0, y: -10, height: 0 }}
+                  >
+                    <AlertTriangle className="w-3 h-3" />
+                    {errors.password.message}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </motion.div>
+
+            {/* Server Error Display */}
+            <AnimatePresence>
+              {serverError && (
+                <motion.div
+                  className="relative p-4 bg-destructive/10 border border-destructive/30 rounded-sm"
+                  initial={{ opacity: 0, scale: 0.95, height: 0 }}
+                  animate={{ opacity: 1, scale: 1, height: "auto" }}
+                  exit={{ opacity: 0, scale: 0.95, height: 0 }}
+                >
+                  <CornerBracket position="tl" color="destructive" />
+                  <CornerBracket position="br" color="destructive" />
+                  
+                  <div className="flex items-start gap-3">
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                        opacity: [1, 0.7, 1] 
+                      }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    >
+                      <AlertTriangle className="w-5 h-5 text-destructive mt-0.5" />
+                    </motion.div>
+                    <div>
+                      <p className="font-system text-sm text-destructive font-medium">
+                        AUTHENTICATION FAILED
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {serverError}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Submit Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-12 font-system text-sm uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground relative overflow-hidden group"
+              >
+                {/* Button Glow Effect */}
+                <motion.div
+                  className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                  initial={{ x: "-100%" }}
+                  animate={{ x: isLoading ? "100%" : "-100%" }}
+                  transition={{ 
+                    duration: 1, 
+                    repeat: isLoading ? Infinity : 0,
+                    ease: "linear"
+                  }}
+                />
+                
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    AUTHENTICATING...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Zap className="w-4 h-4" />
+                    INITIATE SESSION
+                  </span>
+                )}
+              </Button>
+            </motion.div>
+          </form>
+
+          {/* Footer Link */}
+          <motion.div
+            className="mt-8 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
           >
-            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-          </button>
+            <p className="text-sm text-muted-foreground">
+              New to the system?{" "}
+              <Link 
+                href="/register" 
+                className="text-primary hover:text-primary/80 font-medium transition-colors relative group"
+              >
+                <span className="relative">
+                  Awaken Now
+                  <motion.span
+                    className="absolute -bottom-0.5 left-0 right-0 h-px bg-primary"
+                    initial={{ scaleX: 0 }}
+                    whileHover={{ scaleX: 1 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </span>
+              </Link>
+            </p>
+          </motion.div>
+
+          {/* System Footer */}
+          <motion.div
+            className="mt-6 pt-4 border-t border-primary/20 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9 }}
+          >
+            <p className="text-xs text-muted-foreground/60 font-mono">
+              <motion.span
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                ◆
+              </motion.span>
+              {" "}SYSTEM v2.0 :: SECURE PORTAL{" "}
+              <motion.span
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+              >
+                ◆
+              </motion.span>
+            </p>
+          </motion.div>
         </div>
-
-        {serverError && (
-          <p className="text-sm text-red-400 text-center">{serverError}</p>
-        )}
-
-        <FormButton type="submit" loading={isPending} className="w-full">
-          Sign in
-        </FormButton>
-      </form>
-
-      <p className="text-sm text-center text-gray-400">
-        Don&apos;t have an account?{" "}
-        <Link href="/register" className="text-primary font-medium hover:underline">
-          Create one
-        </Link>
-      </p>
+      </motion.div>
     </div>
   );
-}
+};
 
-
-
-
+export default LoginForm;

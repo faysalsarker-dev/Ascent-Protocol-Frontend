@@ -1,15 +1,16 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/src/components/ui/drawer';
-import { Target, TrendingUp, MessageSquare, ChevronRight, Plus, Trash2, Zap } from 'lucide-react';
+import { Target, TrendingUp, MessageSquare, ChevronRight, Plus, Trash2, Zap, Swords, Award } from 'lucide-react';
 import { Button } from '@/src/components/ui/button';
 import { Exercise, PreviousPerformance } from '@/src/types/workout';
+import { GlitchText, CornerBracket, ScanlineOverlay } from './GamifiedEffects';
 
 interface ExerciseDrawerProps {
   exercise: Exercise | null;
   isOpen: boolean;
   onClose: () => void;
-  onComplete: (exerciseId: string, sets: Array<{ reps: number; weight?: number }>) => void;
+  onComplete: (exerciseId: string) => void;
 }
 
 interface SetInput {
@@ -21,7 +22,6 @@ interface SetInput {
 export const ExerciseDrawer = ({ exercise, isOpen, onClose, onComplete }: ExerciseDrawerProps) => {
   const [sets, setSets] = useState<SetInput[]>([]);
 
-  // Initialize sets when exercise changes
   useEffect(() => {
     if (exercise && isOpen) {
       setSets(
@@ -34,7 +34,6 @@ export const ExerciseDrawer = ({ exercise, isOpen, onClose, onComplete }: Exerci
     }
   }, [exercise, isOpen]);
 
-  // Mock previous performance data
   const previousPerformance: PreviousPerformance = {
     date: '2024-01-10',
     sets: [
@@ -65,13 +64,7 @@ export const ExerciseDrawer = ({ exercise, isOpen, onClose, onComplete }: Exerci
 
   const handleComplete = () => {
     if (!exercise) return;
-
-    const completedSets = sets.map((set) => ({
-      reps: parseInt(set.reps) || 0,
-      weight: set.weight ? parseFloat(set.weight) : undefined,
-    }));
-
-    onComplete(exercise.id, completedSets);
+    onComplete(exercise.id);
     onClose();
   };
 
@@ -79,79 +72,82 @@ export const ExerciseDrawer = ({ exercise, isOpen, onClose, onComplete }: Exerci
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DrawerContent className="bg-background/80 backdrop-blur-2xl border-t border-primary/40 shadow-[0_-10px_60px_-10px_hsl(var(--primary)/0.3)]">
-        {/* Animated Top Edge */}
+      <DrawerContent className="bg-background/95 backdrop-blur-xl border-t border-primary/40 overflow-hidden">
+        {/* Scanline effect */}
+        <ScanlineOverlay />
+
+        {/* Top Glow Line */}
         <motion.div
           className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent"
-          animate={{
-            opacity: [0.4, 1, 0.4],
-            scaleX: [0.8, 1, 0.8],
-          }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          animate={{ opacity: [0.5, 1, 0.5], scaleX: [0.9, 1, 0.9] }}
+          transition={{ duration: 2, repeat: Infinity }}
         />
 
-        <div className="mx-auto w-full max-w-lg px-4 pb-8">
-          <DrawerHeader className="px-0">
-            <DrawerTitle className="font-display text-xl text-foreground flex items-center gap-2">
+        <div className="relative z-10 mx-auto w-full max-w-lg px-4 pb-8">
+          <DrawerHeader className="px-0 relative">
+            {/* Corner brackets */}
+            <CornerBracket position="tl" />
+            <CornerBracket position="tr" />
+
+            <DrawerTitle className="font-display text-lg text-foreground flex items-center gap-2">
               <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
               >
                 <Target className="w-5 h-5 text-primary" />
               </motion.div>
-              {exercise.exerciseName}
+              <GlitchText>{exercise.exerciseName}</GlitchText>
             </DrawerTitle>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="px-3 py-1 text-xs rounded-full bg-primary/20 text-primary border border-primary/30 backdrop-blur-sm">
+            
+            <div className="flex items-center gap-2 mt-3">
+              <span className="inline-flex items-center gap-1 px-2 py-1 text-[10px] rounded-sm bg-primary/10 text-primary border border-primary/30 font-mono uppercase">
+                <span className="w-1 h-1 rounded-full bg-primary animate-pulse" />
                 {exercise.muscleGroup}
               </span>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-muted-foreground font-mono">
                 {exercise.targetSets} sets × {exercise.targetReps} reps
               </span>
             </div>
           </DrawerHeader>
 
-          {/* Previous Performance - Glassmorphic */}
+          {/* Previous Performance */}
           <motion.div
-            className="relative mb-6 p-4 rounded-2xl bg-card/40 backdrop-blur-xl border border-border/50 shadow-lg overflow-hidden"
+            className="relative mb-5 p-4 rounded-sm bg-card/30 border border-accent/30 overflow-hidden"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            {/* Glass shine effect */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+            <CornerBracket position="tl" color="accent" />
+            <CornerBracket position="br" color="accent" />
             
             <div className="relative z-10">
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-accent" />
-                <span className="font-display text-sm text-accent">Previous Session</span>
+                <span className="text-xs text-accent font-mono uppercase tracking-wider">Previous Session</span>
               </div>
               <div className="flex gap-2">
                 {previousPerformance.sets.map((set, i) => (
                   <motion.div
                     key={i}
-                    className="flex-1 p-3 rounded-xl bg-background/60 backdrop-blur-sm border border-border/40 text-center"
+                    className="flex-1 p-3 rounded-sm bg-background/50 border border-border/30 text-center"
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: 0.3 + i * 0.1 }}
                   >
-                    <span className="text-lg font-bold text-foreground">{set.reps}</span>
-                    <span className="text-xs text-muted-foreground block">reps</span>
+                    <span className="text-xl font-bold text-foreground font-mono">{set.reps}</span>
+                    <span className="text-[10px] text-muted-foreground block font-mono uppercase">reps</span>
                     {set.weight && (
-                      <span className="text-xs text-primary font-medium">{set.weight}kg</span>
+                      <span className="text-xs text-primary font-mono font-bold">{set.weight}kg</span>
                     )}
                   </motion.div>
                 ))}
               </div>
-              <p className="mt-3 text-xs text-muted-foreground">
-                Previous session was strong. Hit all sections this time.
-              </p>
             </div>
           </motion.div>
 
-          {/* System Suggestion - Glassmorphic */}
+          {/* System Tip */}
           <motion.div
-            className="flex items-start gap-3 mb-6 p-4 rounded-2xl bg-secondary/10 backdrop-blur-xl border border-secondary/30"
+            className="flex items-start gap-3 mb-5 p-3 rounded-sm bg-primary/5 border border-primary/20"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
@@ -160,27 +156,27 @@ export const ExerciseDrawer = ({ exercise, isOpen, onClose, onComplete }: Exerci
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <MessageSquare className="w-4 h-4 text-secondary mt-0.5" />
+              <MessageSquare className="w-4 h-4 text-primary mt-0.5" />
             </motion.div>
-            <p className="text-sm text-secondary font-medium">
-              SYSTEM: Maintain full aura output. Push beyond limits.
+            <p className="text-xs text-primary/90 font-mono leading-relaxed">
+              ◆ SYSTEM: Exceed your limits. Shadow extraction awaits the worthy. ◆
             </p>
           </motion.div>
 
-          {/* Dynamic Set Inputs */}
-          <div className="space-y-3 mb-6">
+          {/* Set Inputs */}
+          <div className="space-y-3 mb-5">
             <div className="flex items-center justify-between">
-              <h4 className="font-display text-sm text-muted-foreground flex items-center gap-2">
-                <Zap className="w-4 h-4 text-primary" />
+              <h4 className="text-xs text-muted-foreground flex items-center gap-2 font-mono uppercase tracking-wider">
+                <Swords className="w-4 h-4 text-primary" />
                 Log Your Sets
               </h4>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleAddSet}
-                className="text-primary hover:text-primary hover:bg-primary/10 gap-1"
+                className="text-primary hover:text-primary hover:bg-primary/10 gap-1 h-7 text-xs font-mono"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3 h-3" />
                 Add Set
               </Button>
             </div>
@@ -190,34 +186,32 @@ export const ExerciseDrawer = ({ exercise, isOpen, onClose, onComplete }: Exerci
                 <motion.div
                   key={set.id}
                   layout
-                  className="relative flex items-center gap-3 p-4 rounded-2xl bg-card/30 backdrop-blur-xl border border-border/40 shadow-md overflow-hidden group"
-                  initial={{ opacity: 0, x: -30, scale: 0.9 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: 30, scale: 0.9 }}
+                  className="relative flex items-center gap-3 p-3 rounded-sm bg-card/20 border border-border/30 group overflow-hidden"
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
                   transition={{ delay: i * 0.05 }}
                 >
-                  {/* Subtle gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 pointer-events-none" />
-
+                  {/* Set number badge */}
                   <motion.span
-                    className="relative z-10 w-10 h-10 rounded-xl bg-primary/20 backdrop-blur-sm border border-primary/30 flex items-center justify-center text-sm font-bold text-primary"
+                    className="w-9 h-9 rounded-sm bg-primary/10 border border-primary/30 flex items-center justify-center text-sm font-bold text-primary font-mono"
                     whileHover={{ scale: 1.1 }}
                   >
-                    {i + 1}
+                    {String(i + 1).padStart(2, '0')}
                   </motion.span>
 
-                  <div className="relative z-10 flex-1 grid grid-cols-2 gap-3">
+                  <div className="flex-1 grid grid-cols-2 gap-2">
                     <input
                       type="number"
                       placeholder="Reps"
-                      className="w-full px-4 py-3 rounded-xl bg-background/60 backdrop-blur-sm border border-border/50 text-foreground text-center placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all"
+                      className="w-full px-3 py-2.5 rounded-sm bg-background/50 border border-border/40 text-foreground text-center text-sm font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
                       value={set.reps}
                       onChange={(e) => handleSetChange(set.id, 'reps', e.target.value)}
                     />
                     <input
                       type="number"
                       placeholder="Weight (kg)"
-                      className="w-full px-4 py-3 rounded-xl bg-background/60 backdrop-blur-sm border border-border/50 text-foreground text-center placeholder:text-muted-foreground/60 focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20 transition-all"
+                      className="w-full px-3 py-2.5 rounded-sm bg-background/50 border border-border/40 text-foreground text-center text-sm font-mono placeholder:text-muted-foreground/40 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
                       value={set.weight}
                       onChange={(e) => handleSetChange(set.id, 'weight', e.target.value)}
                     />
@@ -225,7 +219,7 @@ export const ExerciseDrawer = ({ exercise, isOpen, onClose, onComplete }: Exerci
 
                   {sets.length > 1 && (
                     <motion.button
-                      className="relative z-10 p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
+                      className="p-1.5 rounded-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
                       onClick={() => handleRemoveSet(set.id)}
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
@@ -238,16 +232,38 @@ export const ExerciseDrawer = ({ exercise, isOpen, onClose, onComplete }: Exerci
             </AnimatePresence>
           </div>
 
-          {/* Complete Button - Enhanced */}
+          {/* Complete Button */}
           <motion.button
-            className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-primary to-accent text-primary-foreground font-display font-semibold text-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/40 transition-shadow"
+            className="relative w-full py-4 px-6 rounded-sm bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-mono font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 overflow-hidden"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleComplete}
+            style={{
+              boxShadow: '0 0 20px hsl(var(--primary) / 0.4)',
+            }}
           >
-            Complete Session
+            {/* Animated shine */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              animate={{ x: ['-100%', '100%'] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+            />
+            
+            <Award className="w-5 h-5" />
+            <span>Complete Exercise</span>
             <ChevronRight className="w-5 h-5" />
           </motion.button>
+
+          {/* XP Preview */}
+          <motion.div
+            className="flex items-center justify-center gap-2 mt-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Zap className="w-4 h-4 text-yellow-500" />
+            <span className="text-xs font-mono text-yellow-500">+25 XP on completion</span>
+          </motion.div>
         </div>
       </DrawerContent>
     </Drawer>

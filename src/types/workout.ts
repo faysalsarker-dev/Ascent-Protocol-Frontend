@@ -64,13 +64,13 @@ export interface PreviousPerformance {
 
 // Muscle Group to Image Path Mapping
 export const muscleGroupImageMap: Record<MuscleGroup | 'DEFAULT', string> = {
-  CHEST: '/fullBody.png',
-  BACK: '/fullBodyBack.png',
-  LEGS: '/fullBody.png',
-  ARMS: '/fullBodyBack.png',
-  SHOULDER: '/fullBody.png',
+  CHEST: '/chest.png',
+  BACK: '/back.png',
+  LEGS: '/leg.png',
+  ARMS: '/bicep.png',
+  SHOULDER: '/shoulder.png',
   CARDIO: '/fullBodyBack.png',
-  CORE: '/fullBody.png',
+  CORE: '/abs.png',
   FULL_BODY: '/fullBodyBack.png',
   DEFAULT: '/fullBody.png',
 };

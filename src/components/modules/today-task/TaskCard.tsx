@@ -1,11 +1,8 @@
 import { motion } from 'framer-motion';
-import { Exercise, getMuscleGroupImage } from '@/src/types/workout';
-import { Dumbbell, Target, FileText } from 'lucide-react';
+import { Exercise } from '@/src/types/workout';
+import { Target, ChevronRight, Check, FileText, Zap, Swords } from 'lucide-react';
 import { Card } from '@/src/components/ui/card';
-import Image from 'next/image';
-
-
-
+import { CornerBracket } from './GamifiedEffects';
 
 interface TaskCardProps {
   exercise: Exercise;
@@ -15,116 +12,150 @@ interface TaskCardProps {
 }
 
 export const TaskCard = ({ exercise, index, isCompleted = false, onClick }: TaskCardProps) => {
-  const imagePath = getMuscleGroupImage(exercise.muscleGroup);
-
   return (
-   <Card className='p-0'>
-      <motion.div
-        className={`task-card p-4 ${isCompleted ? 'opacity-60' : ''}`}
-        initial={{ opacity: 0, y: 30, rotateX: -10 }}
-        animate={{ opacity: 1, y: 0, rotateX: 0 }}
-        transition={{
-          duration: 0.5,
-          delay: index * 0.1,
-          ease: [0.25, 0.46, 0.45, 0.94],
-        }}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.97 }}
+    <motion.div
+      initial={{ opacity: 0, x: -30 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{
+        duration: 0.4,
+        delay: index * 0.1,
+        type: "spring",
+        stiffness: 100,
+      }}
+    >
+      <Card
+        className={`relative overflow-hidden cursor-pointer transition-all duration-300 rounded-sm border ${
+          isCompleted 
+            ? 'bg-primary/10 border-primary/40' 
+            : 'bg-card/30 hover:bg-card/60 border-border/40 hover:border-primary/40'
+        }`}
         onClick={onClick}
       >
-        <div className="flex items-center gap-4">
-          {/* Muscle Group Icon/Image */}
-          <div className="relative w-16 h-16 shrink-0">
+        {/* Corner Brackets */}
+        <CornerBracket position="tl" color={isCompleted ? "primary" : "primary"} />
+        <CornerBracket position="br" color={isCompleted ? "primary" : "primary"} />
+
+        {/* Completed glow effect */}
+        {isCompleted && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            style={{
+              background: 'linear-gradient(90deg, hsl(var(--primary) / 0.1), transparent, hsl(var(--primary) / 0.1))',
+            }}
+          />
+        )}
+
+        {/* Hover scan effect */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100"
+          whileHover={{
+            background: [
+              'linear-gradient(90deg, transparent, hsl(var(--primary) / 0.1), transparent)',
+            ],
+            backgroundPosition: ['0% 0%', '200% 0%'],
+          }}
+          transition={{ duration: 1, repeat: Infinity }}
+        />
+
+        <div className="p-4 relative z-10">
+          <div className="flex items-center gap-4">
+            {/* Index/Check Badge */}
             <motion.div
-              className="absolute inset-0 rounded-lg bg-linear-to-br from-primary/20 to-secondary/20 flex items-center justify-center"
-              animate={{
-                boxShadow: [
-                  '0 0 10px hsl(var(--primary) / 0.3)',
-                  '0 0 20px hsl(var(--primary) / 0.5)',
-                  '0 0 10px hsl(var(--primary) / 0.3)',
-                ],
-              }}
+              className={`relative w-12 h-12 rounded-sm flex items-center justify-center font-mono text-sm font-bold border ${
+                isCompleted 
+                  ? 'bg-primary text-primary-foreground border-primary' 
+                  : 'bg-muted/30 text-muted-foreground border-border/50'
+              }`}
+              animate={isCompleted ? {
+                boxShadow: ['0 0 0 0 hsl(var(--primary) / 0)', '0 0 15px 3px hsl(var(--primary) / 0.4)', '0 0 0 0 hsl(var(--primary) / 0)'],
+              } : {}}
               transition={{ duration: 2, repeat: Infinity }}
             >
-<Image 
-src={imagePath}
-alt="Muscle Group"
-width={64}
-height={64}
-/>
+              {isCompleted ? (
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  <Check className="w-6 h-6" />
+                </motion.div>
+              ) : (
+                <span className="text-lg">{String(index + 1).padStart(2, '0')}</span>
+              )}
+              
+              {/* Corner accent */}
+              <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary/50" />
             </motion.div>
-            
-            {/* Completion Badge */}
-            {isCompleted && (
-              <motion.div
-                className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-accent flex items-center justify-center"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', stiffness: 500 }}
-              >
-                <span className="text-xs">✓</span>
-              </motion.div>
-            )}
-          </div>
-  
-          {/* Exercise Info */}
-          <div className="flex-1 min-w-0">
-            <h3 className="font-display text-lg font-semibold text-foreground truncate">
-              {exercise.exerciseName}
-            </h3>
-            
-            <div className="flex items-center gap-3 mt-1">
-              <div className="flex items-center gap-1 text-sm text-primary">
-                <Target className="w-3 h-3" />
-                <span>{exercise.targetSets} sets</span>
+
+            {/* Exercise Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className={`font-semibold truncate ${isCompleted ? 'text-primary line-through' : 'text-foreground'}`}>
+                  {exercise.exerciseName}
+                </h3>
+                {isCompleted && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex items-center gap-1 px-1.5 py-0.5 bg-yellow-500/20 border border-yellow-500/30 rounded-sm"
+                  >
+                    <Zap className="w-3 h-3 text-yellow-500" />
+                    <span className="text-[10px] font-mono text-yellow-500">+25 XP</span>
+                  </motion.div>
+                )}
               </div>
               
-              {exercise.targetReps !== '0' && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <span>×{exercise.targetReps} reps</span>
+              <div className="flex items-center gap-3 mt-1.5">
+                <div className="flex items-center gap-1 text-sm text-primary">
+                  <Target className="w-3 h-3" />
+                  <span className="font-mono">{exercise.targetSets} sets</span>
                 </div>
-              )}
+                
+                {exercise.targetReps !== '0' && (
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                    <Swords className="w-3 h-3" />
+                    <span className="font-mono">{exercise.targetReps} reps</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Muscle Group Tag */}
+              <div className="mt-2">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded-sm bg-accent/10 text-accent border border-accent/20 font-mono uppercase tracking-wider">
+                  <span className="w-1 h-1 rounded-full bg-accent animate-pulse" />
+                  {exercise.muscleGroup}
+                </span>
+              </div>
             </div>
-  
-            {/* Muscle Group Tag */}
-            <div className="mt-2">
-              <span className="inline-block px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary border border-primary/20">
-                {exercise.muscleGroup}
-              </span>
-            </div>
+
+            {/* Arrow */}
+            <motion.div
+              className="text-primary/50"
+              animate={{ x: [0, 6, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              <ChevronRight className="w-6 h-6" />
+            </motion.div>
           </div>
-  
-          {/* Arrow Indicator */}
-          <motion.div
-            className="text-muted-foreground"
-            animate={{ x: [0, 5, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </motion.div>
+
+          {/* Notes */}
+          {exercise.notes && (
+            <motion.div 
+              className="mt-3 pt-3 border-t border-border/20"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                <FileText className="w-3 h-3 mt-0.5 shrink-0 text-primary/50" />
+                <span className="line-clamp-2 font-mono">{exercise.notes}</span>
+              </div>
+            </motion.div>
+          )}
         </div>
-  
-        {/* Notes Preview */}
-        {exercise.notes && (
-          <div className="mt-3 pt-3 border-t border-border/30">
-            <div className="flex items-start gap-2 text-xs text-muted-foreground">
-              <FileText className="w-3 h-3 mt-0.5 shrink-0" />
-              <span className="line-clamp-2">{exercise.notes}</span>
-            </div>
-          </div>
-        )}
-  
-        {/* Hover Glow Effect */}
-        <motion.div
-          className="absolute inset-0 rounded-xl pointer-events-none opacity-0"
-          style={{
-            background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.1) 0%, transparent 70%)',
-          }}
-          whileHover={{ opacity: 1 }}
-        />
-      </motion.div>
-   </Card>
+      </Card>
+    </motion.div>
   );
 };

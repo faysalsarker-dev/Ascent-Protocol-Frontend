@@ -1,11 +1,11 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { LoginForm } from "@/src/components/modules/auth/LoginForm";
+import  LoginForm  from "@/src/components/modules/auth/LoginForm";
 import { Card } from "@/src/components/ui/card";
 
 const LoginPage = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-black">
+    <div className="min-h-screen  relative overflow-hidden ">
      
 
       <Link

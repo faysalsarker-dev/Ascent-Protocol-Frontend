@@ -1,13 +1,27 @@
-"use client";
-
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { extrasSchema, ExtrasForm } from "@/src/schemas/register.schema";
-import { AvatarUploader } from "@/src/components/ui/AvatarUploader";
-import { FormButton } from "@/src/components/ui/FormButton";
+import { z } from "zod";
 import { motion } from "framer-motion";
-import { CalendarIcon, User, Weight, Ruler } from "lucide-react";
-import { useMemo } from "react";
+import { CalendarIcon, User, Weight, Ruler, Upload, X } from "lucide-react";
+import { useMemo, useState, useRef } from "react";
+import { Input } from "@/src/components/ui/input";
+import { Button } from "@/src/components/ui/button";
+import { Label } from "@/src/components/ui/label";
+import { Textarea } from "@/src/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
+
+// Schema
+const extrasSchema = z.object({
+  avatar: z.any().optional(),
+  bio: z.string().max(300, "Bio must be less than 300 characters").optional(),
+  dateOfBirth: z.string().optional(),
+  gender: z.enum(["male", "female", "other", "prefer-not-to-say"]).optional(),
+  weight: z.number().min(0).max(500).optional(),
+  height: z.number().min(0).max(300).optional(),
+});
+
+export type ExtrasForm = z.infer<typeof extrasSchema>;
 
 interface RegisterStepExtrasProps {
   onSubmit: (data: ExtrasForm) => void | Promise<void>;
@@ -24,10 +38,14 @@ export function RegisterStepExtras({
   loading,
   errorMessage,
 }: RegisterStepExtrasProps) {
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const { 
     control, 
     handleSubmit, 
-    watch, 
+    watch,
+    setValue,
     formState: { errors, isDirty } 
   } = useForm<ExtrasForm>({
     resolver: zodResolver(extrasSchema),
@@ -44,7 +62,6 @@ export function RegisterStepExtras({
   const bioLength = watch("bio")?.length || 0;
   const formValues = watch();
 
-  // Check if user has entered any data
   const hasAnyData = useMemo(() => {
     return !!(
       formValues.avatar ||
@@ -56,30 +73,47 @@ export function RegisterStepExtras({
     );
   }, [formValues]);
 
-  // Generate years array (from 1920 to current year)
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear();
     return Array.from({ length: currentYear - 1919 }, (_, i) => currentYear - i);
   }, []);
 
-  // Days array
   const days = useMemo(() => Array.from({ length: 31 }, (_, i) => i + 1), []);
 
-  // Months array
   const months = useMemo(() => [
-    { value: 1, label: 'January' },
-    { value: 2, label: 'February' },
-    { value: 3, label: 'March' },
-    { value: 4, label: 'April' },
-    { value: 5, label: 'May' },
-    { value: 6, label: 'June' },
-    { value: 7, label: 'July' },
-    { value: 8, label: 'August' },
-    { value: 9, label: 'September' },
-    { value: 10, label: 'October' },
-    { value: 11, label: 'November' },
-    { value: 12, label: 'December' },
+    { value: "1", label: "January" },
+    { value: "2", label: "February" },
+    { value: "3", label: "March" },
+    { value: "4", label: "April" },
+    { value: "5", label: "May" },
+    { value: "6", label: "June" },
+    { value: "7", label: "July" },
+    { value: "8", label: "August" },
+    { value: "9", label: "September" },
+    { value: "10", label: "October" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" },
   ], []);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setValue("avatar", file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeAvatar = () => {
+    setValue("avatar", null);
+    setAvatarPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   return (
     <motion.form
@@ -90,70 +124,88 @@ export function RegisterStepExtras({
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-6"
     >
-      {/* Avatar */}
-      <div>
-        <Controller
-          name="avatar"
-          control={control}
-          render={({ field }) => (
-            <AvatarUploader 
-              value={field.value} 
-              onChange={field.onChange}
-            />
+      {/* Avatar Upload */}
+      <div className="flex flex-col items-center gap-4">
+        <div className="relative">
+          <Avatar className="w-24 h-24 border-2 border-primary/30">
+            <AvatarImage src={avatarPreview || ""} />
+            <AvatarFallback className="bg-primary/10 text-primary text-2xl font-mono">
+              ?
+            </AvatarFallback>
+          </Avatar>
+          {avatarPreview && (
+            <button
+              type="button"
+              onClick={removeAvatar}
+              className="absolute -top-1 -right-1 w-6 h-6 bg-destructive rounded-full flex items-center justify-center"
+            >
+              <X className="w-3 h-3 text-destructive-foreground" />
+            </button>
           )}
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleAvatarChange}
+          className="hidden"
+          disabled={loading}
         />
-        {errors.avatar && (
-          <p className="text-xs text-red-400 mt-2">{errors.avatar.message as string}</p>
-        )}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={loading}
+          className="font-mono text-xs"
+        >
+          <Upload className="w-3 h-3 mr-2" />
+          UPLOAD AVATAR
+        </Button>
       </div>
 
       {/* Bio */}
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-gray-200 flex items-center gap-2">
-          <User className="w-4 h-4" />
+        <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+          <User className="w-4 h-4 text-primary" />
           Bio
-        </label>
+        </Label>
         <Controller
           name="bio"
           control={control}
           render={({ field }) => (
-            <textarea
+            <Textarea
               {...field}
-              value={field.value || ''}
-              placeholder="Talk about yourself like you're the next ranker..."
-              className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent min-h-[100px] resize-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              maxLength={300}
+              value={field.value || ""}
+              placeholder="Describe yourself as a hunter..."
               disabled={loading}
+              className="bg-background/50 border-border/50 focus:border-primary/50 min-h-[80px] resize-none"
+              maxLength={300}
             />
           )}
         />
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-gray-400">{bioLength} / 300 characters</p>
-          {bioLength > 250 && (
-            <p className="text-xs text-yellow-400">
-              {300 - bioLength} characters remaining
-            </p>
-          )}
-        </div>
+        <p className="text-xs text-muted-foreground text-right font-mono">
+          {bioLength} / 300
+        </p>
         {errors.bio && (
-          <p className="text-xs text-red-400">{errors.bio.message}</p>
+          <p className="text-xs text-destructive">{errors.bio.message}</p>
         )}
       </div>
 
       {/* Date of Birth */}
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-gray-200 flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4" />
+        <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+          <CalendarIcon className="w-4 h-4 text-primary" />
           Date of Birth
-        </label>
+        </Label>
         <Controller
           name="dateOfBirth"
           control={control}
           render={({ field }) => {
             const currentDate = field.value ? new Date(field.value) : null;
-            const currentDay = currentDate?.getDate() || '';
-            const currentMonth = currentDate ? currentDate.getMonth() + 1 : '';
-            const currentYear = currentDate?.getFullYear() || '';
+            const currentDay = currentDate?.getDate()?.toString() || "";
+            const currentMonth = currentDate ? (currentDate.getMonth() + 1).toString() : "";
+            const currentYear = currentDate?.getFullYear()?.toString() || "";
 
             const handleDateChange = (day: string, month: string, year: string) => {
               const d = parseInt(day);
@@ -161,161 +213,141 @@ export function RegisterStepExtras({
               const y = parseInt(year);
               
               if (d && m && y) {
-                // Validate the date
                 const date = new Date(y, m - 1, d);
-                // Check if the date is valid (handles invalid dates like Feb 30)
                 if (date.getDate() === d && date.getMonth() === m - 1) {
                   field.onChange(date.toISOString());
                 }
               } else if (!d && !m && !y) {
-                // Clear the date if all fields are empty
-                field.onChange('');
+                field.onChange("");
               }
             };
 
             return (
-              <div className="grid grid-cols-3 gap-3">
-                {/* Day */}
-                <select
+              <div className="grid grid-cols-3 gap-2">
+                <Select
                   value={currentDay}
-                  onChange={(e) => {
-                    handleDateChange(e.target.value, currentMonth.toString(), currentYear.toString());
-                  }}
+                  onValueChange={(value) => handleDateChange(value, currentMonth, currentYear)}
                   disabled={loading}
-                  className="px-3 py-3 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Day"
                 >
-                  <option value="">Day</option>
-                  {days.map(day => (
-                    <option key={day} value={day}>{day}</option>
-                  ))}
-                </select>
+                  <SelectTrigger className="bg-background/50 border-border/50">
+                    <SelectValue placeholder="Day" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {days.map(day => (
+                      <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-                {/* Month */}
-                <select
+                <Select
                   value={currentMonth}
-                  onChange={(e) => {
-                    handleDateChange(currentDay.toString(), e.target.value, currentYear.toString());
-                  }}
+                  onValueChange={(value) => handleDateChange(currentDay, value, currentYear)}
                   disabled={loading}
-                  className="px-3 py-3 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Month"
                 >
-                  <option value="">Month</option>
-                  {months.map(month => (
-                    <option key={month.value} value={month.value}>{month.label}</option>
-                  ))}
-                </select>
+                  <SelectTrigger className="bg-background/50 border-border/50">
+                    <SelectValue placeholder="Month" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {months.map(month => (
+                      <SelectItem key={month.value} value={month.value}>{month.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
-                {/* Year */}
-                <select
+                <Select
                   value={currentYear}
-                  onChange={(e) => {
-                    handleDateChange(currentDay.toString(), currentMonth.toString(), e.target.value);
-                  }}
+                  onValueChange={(value) => handleDateChange(currentDay, currentMonth, value)}
                   disabled={loading}
-                  className="px-3 py-3 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label="Year"
                 >
-                  <option value="">Year</option>
-                  {years.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
+                  <SelectTrigger className="bg-background/50 border-border/50">
+                    <SelectValue placeholder="Year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {years.map(year => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             );
           }}
         />
-        {errors.dateOfBirth && (
-          <p className="text-xs text-red-400">{errors.dateOfBirth.message as string}</p>
-        )}
       </div>
 
       {/* Gender */}
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-gray-200">Gender</label>
+        <Label className="text-sm font-medium text-foreground">Gender</Label>
         <Controller
           name="gender"
           control={control}
           render={({ field }) => (
-            <select
-              {...field}
-              value={field.value || ''}
+            <Select
+              value={field.value || ""}
+              onValueChange={field.onChange}
               disabled={loading}
-              className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Gender"
             >
-              <option value="">Select gender</option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-              <option value="prefer-not-to-say">Prefer not to say</option>
-            </select>
+              <SelectTrigger className="bg-background/50 border-border/50">
+                <SelectValue placeholder="Select gender" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="male">Male</SelectItem>
+                <SelectItem value="female">Female</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+              </SelectContent>
+            </Select>
           )}
         />
-        {errors.gender && (
-          <p className="text-xs text-red-400">{errors.gender.message}</p>
-        )}
       </div>
 
       {/* Weight & Height */}
       <div className="grid grid-cols-2 gap-4">
-        {/* Weight */}
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-200 flex items-center gap-2">
-            <Weight className="w-4 h-4" />
+          <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+            <Weight className="w-4 h-4 text-primary" />
             Weight (kg)
-          </label>
+          </Label>
           <Controller
             name="weight"
             control={control}
             render={({ field }) => (
-              <input
+              <Input
                 type="number"
                 step="0.1"
                 min="0"
                 max="500"
                 placeholder="70"
-                value={field.value || ''}
+                value={field.value || ""}
                 onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
                 disabled={loading}
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Weight in kilograms"
+                className="bg-background/50 border-border/50 focus:border-primary/50"
               />
             )}
           />
-          {errors.weight && (
-            <p className="text-xs text-red-400">{errors.weight.message}</p>
-          )}
         </div>
 
-        {/* Height */}
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-200 flex items-center gap-2">
-            <Ruler className="w-4 h-4" />
+          <Label className="text-sm font-medium text-foreground flex items-center gap-2">
+            <Ruler className="w-4 h-4 text-primary" />
             Height (cm)
-          </label>
+          </Label>
           <Controller
             name="height"
             control={control}
             render={({ field }) => (
-              <input
+              <Input
                 type="number"
                 step="0.1"
                 min="0"
                 max="300"
                 placeholder="175"
-                value={field.value || ''}
+                value={field.value || ""}
                 onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
                 disabled={loading}
-                className="w-full px-4 py-3 bg-gray-900/50 border border-gray-700/50 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-transparent transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Height in centimeters"
+                className="bg-background/50 border-border/50 focus:border-primary/50"
               />
             )}
           />
-          {errors.height && (
-            <p className="text-xs text-red-400">{errors.height.message}</p>
-          )}
         </div>
       </div>
 
@@ -324,9 +356,9 @@ export function RegisterStepExtras({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg"
+          className="p-3 bg-destructive/10 border border-destructive/50 rounded-lg"
         >
-          <p className="text-sm text-red-400 text-center">{errorMessage}</p>
+          <p className="text-sm text-destructive text-center font-mono">{errorMessage}</p>
         </motion.div>
       )}
 
@@ -335,42 +367,41 @@ export function RegisterStepExtras({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-3 bg-blue-500/10 border border-blue-500/50 rounded-lg"
+          className="p-3 bg-system-info/10 border border-system-info/50 rounded-lg"
         >
-          <p className="text-xs text-blue-400 text-center">
-            Your profile information will be saved. You can always update it later in settings.
+          <p className="text-xs text-system-info text-center font-mono">
+            Profile data will be saved. Update anytime in settings.
           </p>
         </motion.div>
       )}
 
       {/* Buttons */}
       <div className="flex gap-3 pt-4">
-        <FormButton 
+        <Button 
           type="button" 
           variant="outline" 
           onClick={onBack} 
-          className="flex-1" 
           disabled={loading}
+          className="flex-1 font-mono text-xs"
         >
-          Back
-        </FormButton>
-        <FormButton 
+          ← BACK
+        </Button>
+        <Button 
           type="button" 
           variant="secondary" 
           onClick={onSkip} 
-          className="flex-1" 
           disabled={loading}
+          className="flex-1 font-mono text-xs"
         >
-          {hasAnyData ? 'Skip & Continue' : 'Skip'}
-        </FormButton>
-        <FormButton 
+          SKIP
+        </Button>
+        <Button 
           type="submit" 
-          loading={loading} 
-          className="flex-1"
           disabled={loading}
+          className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs"
         >
-          {loading ? 'Saving...' : hasAnyData ? 'Complete Setup' : 'Continue'}
-        </FormButton>
+          {loading ? "SAVING..." : "COMPLETE →"}
+        </Button>
       </div>
     </motion.form>
   );

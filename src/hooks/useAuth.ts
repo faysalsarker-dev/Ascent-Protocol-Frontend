@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMe, registerUser, updateMyProfile,updatePassword } from "../services/auth/auth.service";
 import { toast } from "sonner";
 import toFormData from "../utils/FormDataconverter";
+import { loginUser } from "../services/auth/session.service";
 
 export function useCreateUser(workoutPlanId: string) {
   const queryClient = useQueryClient();
@@ -21,6 +22,20 @@ export function useCreateUser(workoutPlanId: string) {
     onError: (error) => {
       console.error("Failed to create workout day:", error);
       toast.error(error.message || "Registration failed. Please try again.");
+    },
+  });
+}
+
+export function useLoginUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data:{email:string,password:string}) => loginUser(data),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["user-info"] });
+
+ 
     },
   });
 }

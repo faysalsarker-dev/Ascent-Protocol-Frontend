@@ -1,15 +1,18 @@
-"use client";
-
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { motion, AnimatePresence } from "framer-motion";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Label } from "@/src/components/ui/label";
-import { Dumbbell, Sparkles } from "lucide-react";
-import { FormButton } from "@/src/components/ui/FormButton";
-import { FormInput } from "@/src/components/ui/FormInput";
-import { useCreateWorkoutPlan } from "@/src/hooks/useWorkoutPlan";
+import { Input } from "@/src/components/ui/input";
+import { Button } from "@/src/components/ui/button";
+import { Dumbbell, Sparkles, AlertTriangle, Loader2, Zap } from "lucide-react";
 import { useWorkoutBuilder } from "@/src/context/WorkoutBuilderContext";
+import { 
+  GlitchText, 
+  CornerBracket, 
+  HexagonIcon 
+} from "@/src/components/modules/today-task/GamifiedEffects";
 
 const planSchema = z.object({
   name: z
@@ -26,10 +29,8 @@ type PlanFormData = z.infer<typeof planSchema>;
 
 const CreatePlanStep = () => {
   const { setPlan, goToNextStep } = useWorkoutBuilder();
-  const createPlanMutation = useCreateWorkoutPlan();
 
   const {
-    control,
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
@@ -38,80 +39,156 @@ const CreatePlanStep = () => {
   });
 
   const handleFormSubmit = async (data: PlanFormData) => {
-    try {
-      const result = await createPlanMutation.mutateAsync(data);
-      
-      if (result?.success && result.data) {
-        setPlan({ ...data, id: result.data.id });
-        goToNextStep();
-      }
-    } catch (error) {
-      // Error is already handled in the mutation
-      console.error("Create plan error:", error);
-    }
+    // Simulate API call - replace with actual mutation
+    await new Promise(resolve => setTimeout(resolve, 800));
+    const planData = { name: data.name, description: data.description, id: `plan-${Date.now()}` };
+    setPlan(planData);
+    goToNextStep();
   };
 
   return (
-    <div className="animate-slide-up">
-      <div className="status-window">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 rounded-xl bg-primary/20 neon-glow">
-            <Dumbbell className="w-6 h-6 text-primary" />
-          </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="space-y-6"
+    >
+      {/* Header Card */}
+      <div className="relative bg-card/60 backdrop-blur-xl border border-primary/30 rounded-sm p-6">
+        <CornerBracket position="tl" color="primary" />
+        <CornerBracket position="tr" color="primary" />
+        <CornerBracket position="bl" color="primary" />
+        <CornerBracket position="br" color="primary" />
+
+        <div className="flex items-center gap-4 mb-6">
+          <HexagonIcon icon={Dumbbell} color="primary" size="md" />
           <div>
-            <h2 className="text-xl font-display font-bold text-foreground neon-text">
-              CREATE WORKOUT PLAN
+            <h2 className="font-system text-xl font-bold">
+              <GlitchText className="text-glow">CREATE WORKOUT PLAN</GlitchText>
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-primary" />
               Design your path to power
             </p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-          <div className="form-field">
-            <FormInput
-              name="name"
-              label="Plan Name"
-              control={control}
-              placeholder="e.g., Muscle Building Plan"
-              type="text"
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-5">
+          {/* Plan Name */}
+          <motion.div
+            className="space-y-2"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Label className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <Zap className="w-3 h-3 text-primary" />
+              Plan Name
+            </Label>
+            <div className="relative">
+              <Input
+                placeholder="e.g., Muscle Building Plan"
+                className={`bg-background/60 border-primary/30 focus:border-primary focus:ring-primary/30 placeholder:text-muted-foreground/50 ${
+                  errors.name ? "border-destructive" : ""
+                }`}
+                {...register("name")}
+              />
+              {errors.name && (
+                <motion.div
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                >
+                  <AlertTriangle className="w-4 h-4 text-destructive" />
+                </motion.div>
+              )}
+            </div>
+            <AnimatePresence>
+              {errors.name && (
+                <motion.p
+                  className="text-xs text-destructive flex items-center gap-1"
+                  initial={{ opacity: 0, y: -10, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: -10, height: 0 }}
+                >
+                  <AlertTriangle className="w-3 h-3" />
+                  {errors.name.message}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
-          <div className="form-field space-y-3">
-            <Label htmlFor="description">Description</Label>
+          {/* Description */}
+          <motion.div
+            className="space-y-2"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Label className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+              <Sparkles className="w-3 h-3 text-primary" />
+              Description
+            </Label>
             <Textarea
-              id="description"
               placeholder="e.g., A 7-day plan focused on muscle growth"
+              className={`bg-background/60 border-primary/30 focus:border-primary focus:ring-primary/30 min-h-[100px] placeholder:text-muted-foreground/50 ${
+                errors.description ? "border-destructive" : ""
+              }`}
               {...register("description")}
             />
-            {errors.description && (
-              <p className="text-sm text-destructive animate-scale-in">
-                {errors.description.message}
-              </p>
-            )}
-          </div>
+            <AnimatePresence>
+              {errors.description && (
+                <motion.p
+                  className="text-xs text-destructive flex items-center gap-1"
+                  initial={{ opacity: 0, y: -10, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: "auto" }}
+                  exit={{ opacity: 0, y: -10, height: 0 }}
+                >
+                  <AlertTriangle className="w-3 h-3" />
+                  {errors.description.message}
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </motion.div>
 
-          <FormButton
-            type="submit"
-            loading={isSubmitting || createPlanMutation.isPending}
-            variant="default"
-            className="w-full flex items-center justify-center gap-2"
+          {/* Submit Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
           >
-            {isSubmitting || createPlanMutation.isPending ? (
-              <span className="animate-pulse">INITIATING...</span>
-            ) : (
-              <>
-                <Sparkles className="w-5 h-5" />
-                CREATE PLAN
-              </>
-            )}
-          </FormButton>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full h-12 font-system text-sm uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground relative overflow-hidden"
+            >
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                initial={{ x: "-100%" }}
+                animate={{ x: isSubmitting ? "100%" : "-100%" }}
+                transition={{ 
+                  duration: 1, 
+                  repeat: isSubmitting ? Infinity : 0,
+                  ease: "linear"
+                }}
+              />
+              
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  INITIATING...
+                </span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  CREATE PLAN
+                </span>
+              )}
+            </Button>
+          </motion.div>
         </form>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

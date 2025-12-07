@@ -8,7 +8,7 @@ import { deleteCookie, extractTokens, getCookie, persistTokens } from "@/src/ser
 
 
 
-type AuthActionResult = {
+export type AuthActionResult = {
   success: boolean;
   message: string;
   data?: unknown;

@@ -1,25 +1,19 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useState } from "react";
-import { Eye, EyeOff, User, Mail, Lock } from "lucide-react";
-import { motion } from "framer-motion";
+import { Eye, EyeOff, User, Mail, Lock, AlertTriangle } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Input } from "@/src/components/ui/input";
 import { Button } from "@/src/components/ui/button";
 import { Label } from "@/src/components/ui/label";
+import { CornerBracket } from "../today-task/GamifiedEffects";
+import { RegisterFormValues, registerSchema } from "@/src/schemas/register.schema";
 
-// Schema
-const registerSchemaBasic = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
 
-export type RegisterBasicForm = z.infer<typeof registerSchemaBasic>;
 
 interface RegisterStepBasicProps {
-  onNext: (data: RegisterBasicForm) => void | Promise<void>;
-  defaultValues?: Partial<RegisterBasicForm>;
+  onNext: (data: RegisterFormValues) => void | Promise<void>;
+  defaultValues?: Partial<RegisterFormValues>;
   loading?: boolean;
   errorMessage?: string | null;
 }
@@ -36,8 +30,8 @@ export function RegisterStepBasic({
     control, 
     handleSubmit, 
     formState: { errors, isSubmitting } 
-  } = useForm<RegisterBasicForm>({
-    resolver: zodResolver(registerSchemaBasic),
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: defaultValues || {
       name: "",
       email: "",
@@ -138,17 +132,41 @@ export function RegisterStepBasic({
         )}
       </div>
 
-      {/* Error Message */}
-      {errorMessage && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="p-3 bg-destructive/10 border border-destructive/50 rounded-lg"
-        >
-          <p className="text-sm text-destructive text-center font-mono">{errorMessage}</p>
-        </motion.div>
-      )}
+ <AnimatePresence>
+              {errorMessage && (
+                <motion.div
+                  className="relative p-4 bg-destructive/10 border border-destructive/30 rounded-sm"
+                  initial={{ opacity: 0, scale: 0.95, height: 0 }}
+                  animate={{ opacity: 1, scale: 1, height: "auto" }}
+                  exit={{ opacity: 0, scale: 0.95, height: 0 }}
+                >
+                  <CornerBracket position="tl" color="destructive" />
+                  <CornerBracket position="br" color="destructive" />
+                  
+                  <div className="flex items-start gap-3">
+                    <motion.div
+                      animate={{ 
+                        scale: [1, 1.2, 1],
+                        opacity: [1, 0.7, 1] 
+                      }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    >
+                      <AlertTriangle className="w-5 h-5 text-destructive mt-0.5" />
+                    </motion.div>
+                    <div>
+                      <p className="font-system text-sm text-destructive font-medium">
+                        AUTHENTICATION FAILED
+                      </p>
+                      <p className="text-xs text-destructive/80 mt-1">
+                        {errorMessage || "Verify your credentials and try again."}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
+ 
       {/* Submit Button */}
       <Button 
         type="submit" 

@@ -1,31 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getMe, registerUser, updateMyProfile,updatePassword } from "../services/auth/auth.service";
 import { toast } from "sonner";
 import toFormData from "../utils/FormDataconverter";
 import { loginUser } from "../services/auth/session.service";
 
-export function useCreateUser(workoutPlanId: string) {
-  const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data) => registerUser(data),
-
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: ["workout-days", workoutPlanId] });
-
-          toast.success(response.message || "Account created successfully! +50 XP");
-
-
-      return response;
-    },
-
-    onError: (error) => {
-      console.error("Failed to create workout day:", error);
-      toast.error(error.message || "Registration failed. Please try again.");
-    },
-  });
+interface UseUserOptions {
+  onSuccess?: (data: any) => void;
+  onError?: (error: any) => void;
 }
 
+interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+}
 
 
 interface LoginPayload {
@@ -33,12 +23,41 @@ interface LoginPayload {
   password: string;
 }
 
-interface UseLoginUserOptions {
-  onSuccess?: (data: any) => void;
-  onError?: (error: any) => void;
+
+
+
+export function useCreateUser(options?: UseUserOptions) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: RegisterPayload) => {
+      const result = await registerUser(data);
+      
+      if (!result.success) {
+        throw new Error(result.message || "Registration failed");
+      }
+      
+      return result;
+    },
+
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["user-info"] });
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
+      options?.onSuccess?.(data);
+    },
+
+    onError: (error) => {
+      options?.onError?.(error);
+    },
+  });
 }
 
-export function useLoginUser(options?: UseLoginUserOptions) {
+
+
+
+
+
+export function useLoginUser(options?: UseUserOptions) {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -78,7 +97,7 @@ export function useUpdateUser() {
 
   return useMutation({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: (dataObj) => {
+    mutationFn: (dataObj:Record<string, any>) => {
       const formData = toFormData(dataObj);  
       return updateMyProfile(formData);
     },
@@ -97,6 +116,8 @@ export function useUpdateUser() {
 }
 
 
+
+ 
 export function usePassWordChange() {
   const queryClient = useQueryClient();
 

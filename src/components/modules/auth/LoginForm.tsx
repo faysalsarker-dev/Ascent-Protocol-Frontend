@@ -1,7 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, ShieldCheck, Zap, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";

@@ -1,103 +1,119 @@
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import { useState } from "react";
 import { toast } from "sonner";
 import { Trophy, Zap, Shield } from "lucide-react";
-import { RegisterStepBasic, RegisterBasicForm } from "@/src/components/modules/auth/RegisterStepBasic";
-import { RegisterStepExtras, ExtrasForm } from "@/src/components/modules/auth/RegisterStepExtras";
+import { useRouter } from "next/navigation";
+
+import {
+  RegisterStepExtras,
+  ExtrasForm,
+} from "@/src/components/modules/auth/RegisterStepExtras";
 import { AnimatePresence, motion } from "framer-motion";
 import { Progress } from "@/src/components/ui/progress";
+import { useCreateUser, useUpdateUser } from "@/src/hooks/useAuth";
+import { RegisterStepBasic } from "./RegisterStepBasic";
+import { RegisterFormValues } from "@/src/schemas/register.schema";
+
 
 type RegistrationStep = "basic" | "extras";
-type RegistrationState = "idle" | "registering" | "registered" | "updating" | "completed";
 
 export default function RegisterStepper() {
+  const router = useRouter();
   const [step, setStep] = useState<RegistrationStep>("basic");
-  const [state, setState] = useState<RegistrationState>("idle");
-  const [basicData, setBasicData] = useState<RegisterBasicForm | null>(null);
-  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const handleBasicSubmit = async (data: RegisterBasicForm) => {
-    if (step !== "basic") return;
-    setSubmissionError(null);
-    setState("registering");
-
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      setBasicData(data);
-      setState("registered");
+  // Register mutation
+  const {
+    mutate: registerUser,
+    isPending: isRegistering,
+    error: registerError,
+  } = useCreateUser({
+    onSuccess: (data) => {
       toast.success("◆ HUNTER REGISTERED ◆ +50 XP");
+      const id = data.data?.userId || data.data?.id || data.data?.user?.id;
+      setUserId(id);
       setStep("extras");
-    } catch (error) {
-      const message = error instanceof Error 
-        ? error.message 
-        : "Registration failed. Please try again.";
-      setSubmissionError(message);
-      toast.error(message);
-      setState("idle");
     }
+  });
+
+  // Update profile mutation - using your existing hook
+  const { mutate: updateProfile, isPending: isUpdating } = useUpdateUser();
+
+  const handleBasicSubmit = (data: RegisterFormValues) => {
+    registerUser(data);
   };
 
-  const handleExtrasSubmit = async (extrasData: ExtrasForm) => {
-    const hasExtrasData = 
-      extrasData.avatar || 
-      extrasData.bio || 
-      extrasData.dateOfBirth || 
-      extrasData.gender || 
-      extrasData.weight || 
-      extrasData.height;
+  const handleExtrasSubmit = (extrasData: ExtrasForm) => {
+  // Check if any data was provided
+  const hasExtrasData =
+    extrasData.avatar ||
+    extrasData.dateOfBirth ||
+    extrasData.gender ||
+    extrasData.weight !== undefined ||
+    extrasData.height !== undefined ||
+    extrasData.currentGoal;
 
-    if (!hasExtrasData) {
-      setState("completed");
-      navigate("/");
-      return;
-    }
+  if (!hasExtrasData) {
+    router.push("/user");
+    return;
+  }
 
-    setState("updating");
+  const updateData: Record<string, any> = {};
 
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+  // Add fields only if they have values
+  if (extrasData.avatar) updateData.avatar = extrasData.avatar;
+  if (extrasData.dateOfBirth) updateData.dateOfBirth = extrasData.dateOfBirth;
+  if (extrasData.gender) updateData.gender = extrasData.gender;
+  if (extrasData.weight !== undefined && extrasData.weight !== null) {
+    updateData.weight = extrasData.weight;
+  }
+  if (extrasData.height !== undefined && extrasData.height !== null) {
+    updateData.height = extrasData.height;
+  }
+  if (extrasData.currentGoal) updateData.currentGoal = extrasData.currentGoal;
+
+  updateProfile(updateData, {
+    onSuccess: () => {
       toast.success("◆ PROFILE ENHANCED ◆ +50 XP");
-      setState("completed");
-    } catch (error) {
+      router.push("/user");
+    },
+    onError: () => {
       toast.warning("Profile details couldn't be saved. You can update them later.");
-      setState("completed");
-    }
-  };
+      router.push("/user"); // Still redirect on error
+    },
+  });
+};
 
   const handleSkip = () => {
-    if (state !== "registered") {
+    if (!userId) {
       toast.error("Please complete registration first.");
       return;
     }
-    setState("completed");
+    router.push("/user");
   };
 
   const handleBack = () => {
-    if (state === "registered" || state === "updating") {
+    if (userId) {
       toast.info("Account already created. Redirecting...");
-      // navigate("/");
+      router.push("/user");
       return;
     }
-    setSubmissionError(null);
     setStep("basic");
   };
 
   const progress = step === "basic" ? 50 : 100;
-  const isLoading = state === "registering" || state === "updating";
+  const isLoading = isRegistering || isUpdating;
 
   return (
     <div className="relative w-full max-w-xl">
-      {/* Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative bg-card/80 backdrop-blur-xl border border-primary/20 rounded-2xl p-8 md:p-12 shadow-2xl"
       >
-        {/* Subtle corner accents */}
+        {/* Corner accents */}
         <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-primary/40 rounded-tl-2xl" />
         <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-primary/40 rounded-tr-2xl" />
         <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-primary/40 rounded-bl-2xl" />
@@ -151,9 +167,8 @@ export default function RegisterStepper() {
             <RegisterStepBasic
               key="basic"
               onNext={handleBasicSubmit}
-              defaultValues={basicData || undefined}
               loading={isLoading}
-              errorMessage={submissionError}
+              errorMessage={registerError?.message || null}
             />
           ) : (
             <RegisterStepExtras
@@ -162,7 +177,6 @@ export default function RegisterStepper() {
               onSkip={handleSkip}
               onBack={handleBack}
               loading={isLoading}
-              errorMessage={submissionError}
             />
           )}
         </AnimatePresence>

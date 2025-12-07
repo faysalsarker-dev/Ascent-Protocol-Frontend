@@ -2,15 +2,12 @@
 import { dataFetch } from "@/src/lib/data-fetch";
 import { revalidateTag } from "next/cache";
 import { extractTokens, persistTokens } from "./tokenHandlers";
+import {  RegisterFormValues, registerSchema } from "@/src/schemas/register.schema";
+import { AuthActionResult } from "./session.service";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-type RegisterActionResult = {
-    success: boolean;
-    message: string;
-    data?: unknown;
-    errors?: Record<string, unknown>;
-}
+
 
 type UpdateProfileResult = {
     success: boolean;
@@ -19,65 +16,84 @@ type UpdateProfileResult = {
 }
 
 
-// Basic registration - accepts plain object, not FormData
-export const registerUser = async (data: {
-    name: string;
-    email: string;
-    password: string;
-}): Promise<RegisterActionResult> => {
-    try {
-        const res = await dataFetch.post("/auth/register", {
-            body: JSON.stringify(data),
+
+
+
+
+
+export const registerUser = async (
+  payload: RegisterFormValues
+): Promise<AuthActionResult> => {
+  try {
+    // Validate input
+    const validation = registerSchema.safeParse(payload);
+    if (!validation.success) {
+      return {
+        success: false,
+        message: "Validation failed",
+        errors: validation.error.flatten().fieldErrors,
+      };
+    }
+
+    // Make API request
+    const response = await dataFetch.post("/auth/register", {
+            body: JSON.stringify(payload),
             headers: {
                 "Content-Type": "application/json",
             },
         });
 
-        const result = await res.json().catch(() => null);
+    const result = await response.json().catch(() => null);
 
- if (!res.ok) {
-            return {
-                success: false,
-                // FIX: Access error.message instead of message
-                message: result?.error?.message || result?.message || "Registration failed. Please try again.",
-                errors: result?.errors || result?.error?.details,
-            };
-        }
-
-        if (result && result.success === false) {
-            return {
-                success: false,
-                // FIX: Access error.message instead of message
-                message: result?.error?.message || result?.message || "Registration failed. Please try again.",
-                errors: result?.errors || result?.error?.details,
-            };
-        }
-
-
-        const { accessToken, refreshToken } = await extractTokens(result);
-            await persistTokens(accessToken, refreshToken);
-       
-
-        return {
-            success: true,
-            message: result?.message || "Registration completed successfully.",
-            data: result?.data,
-        };
-
-    } catch (error: any) {
-        // Re-throw NEXT_REDIRECT errors so Next.js can handle them
-        if (error?.digest?.startsWith('NEXT_REDIRECT')) {
-            throw error;
-        }
-        console.error('Registration error:', error);
-        return { 
-            success: false, 
-            message: process.env.NODE_ENV === 'development' 
-                ? error.message 
-                : "Registration Failed. Please try again." 
-        };
+    // Handle error responses
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result?.error?.message || result?.message || "Registration failed. Please try again.",
+        errors: result?.errors || result?.error?.details,
+      };
     }
-}
+
+    if (result && result.success === false) {
+      return {
+        success: false,
+        message: result?.error?.message || result?.message || "Registration failed. Please try again.",
+        errors: result?.errors || result?.error?.details,
+      };
+    }
+
+    // Extract and persist tokens
+    const { accessToken, refreshToken } = await extractTokens(result);
+    await persistTokens(accessToken, refreshToken);
+
+    return {
+      success: true,
+      message: result?.message || "Registration successful.",
+      data: result?.data,
+    };
+  } catch (error: any) {
+    if (error?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+
+    return {
+      success: false,
+      message:
+        process.env.NODE_ENV === "development"
+          ? error?.message || "Registration failed. Please try again."
+          : "Registration failed. Please try again.",
+    };
+  }
+};
+
+
+
+
+
+
+
+
+
 
 // Update extra profile fields - handles FormData with file upload
 export async function updateProfileExtras(formData: FormData): Promise<UpdateProfileResult> {
@@ -220,4 +236,14 @@ export async function getMe() {
     throw error;
   }
 }
+
+
+
+
+
+
+
+
+
+
 

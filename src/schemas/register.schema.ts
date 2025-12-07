@@ -1,18 +1,12 @@
 import { z } from 'zod';
 
-export const registerSchemaBasic = z.object({
-  name: z.string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(50, 'Name must be less than 50 characters'),
-  email: z.string()
-    .email('Invalid email address')
-    .max(255, 'Email must be less than 255 characters'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
+export const registerSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
+
+export type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export const extrasSchema = z.object({
   avatar: z.instanceof(File).optional().nullable(),
@@ -31,5 +25,17 @@ export const extrasSchema = z.object({
     .optional(),
 });
 
-export type RegisterBasicForm = z.infer<typeof registerSchemaBasic>;
 export type ExtrasForm = z.infer<typeof extrasSchema>;
+
+
+export const profileUpdateSchema = z.object({
+  userId: z.string(),
+  avatar: z.instanceof(File).optional(),
+  bio: z.string().max(300).optional().or(z.literal("")),
+  dateOfBirth: z.string().optional().or(z.literal("")),
+  gender: z.enum(["male", "female", "other", "prefer-not-to-say"]).optional(),
+  weight: z.coerce.number().min(20).max(500).optional(),
+  height: z.coerce.number().min(50).max(300).optional(),
+});
+
+export type ProfileUpdateValues = z.infer<typeof profileUpdateSchema>;

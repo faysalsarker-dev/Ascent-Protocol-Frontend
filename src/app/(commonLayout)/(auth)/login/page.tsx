@@ -1,6 +1,5 @@
 
 import  LoginForm  from "@/src/components/modules/auth/LoginForm";
-import { Card } from "@/src/components/ui/card";
 
 const LoginPage = () => {
   return (

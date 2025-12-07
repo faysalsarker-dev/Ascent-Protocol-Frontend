@@ -6,6 +6,8 @@ import { loginSchema } from "@/src/schemas/auth.schema";
 import { LoginFormValues } from "@/src/schemas/auth.schema";
 import { deleteCookie, extractTokens, getCookie, persistTokens } from "@/src/services/auth/tokenHandlers";
 
+
+
 type AuthActionResult = {
   success: boolean;
   message: string;
@@ -19,13 +21,15 @@ type AuthActionResult = {
 
 
 
-export const loginUser = async (formData: FormData): Promise<AuthActionResult> => {
-  try {
-    const payload: LoginFormValues = {
-      email: String(formData.get("email") || ""),
-      password: String(formData.get("password") || ""),
-    };
 
+
+
+
+export const loginUser = async (
+  payload: LoginFormValues
+): Promise<AuthActionResult> => {
+  try {
+    // Validate input
     const validation = loginSchema.safeParse(payload);
     if (!validation.success) {
       return {
@@ -35,39 +39,34 @@ export const loginUser = async (formData: FormData): Promise<AuthActionResult> =
       };
     }
 
+    // Make API request
     const response = await dataFetch.post("/auth/login", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(validation.data),
-    });
+            body: JSON.stringify(payload),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
 
     const result = await response.json().catch(() => null);
 
+    // Handle error responses
+    if (!response.ok) {
+      return {
+        success: false,
+        message: result?.error?.message || result?.message || "Login failed. Please try again.",
+        errors: result?.errors || result?.error?.details,
+      };
+    }
 
+    if (result && result.success === false) {
+      return {
+        success: false,
+        message: result?.error?.message || result?.message || "Login failed. Please try again.",
+        errors: result?.errors || result?.error?.details,
+      };
+    }
 
- if (!response.ok) {
-            return {
-                success: false,
-                // FIX: Access error.message instead of message
-                message: result?.error?.message || result?.message || "Login failed. Please try again.",
-                errors: result?.errors || result?.error?.details,
-            };
-        }
-
-        if (result && result.success === false) {
-            return {
-                success: false,
-                // FIX: Access error.message instead of message
-                message: result?.error?.message || result?.message || "Login failed. Please try again.",
-                errors: result?.errors || result?.error?.details,
-            };
-        }
-
-
-
-
-
+    // Extract and persist tokens
     const { accessToken, refreshToken } = await extractTokens(result);
     await persistTokens(accessToken, refreshToken);
 
@@ -77,6 +76,7 @@ export const loginUser = async (formData: FormData): Promise<AuthActionResult> =
       data: result?.data,
     };
   } catch (error: any) {
+    // Handle Next.js redirects
     if (error?.digest?.startsWith("NEXT_REDIRECT")) {
       throw error;
     }
@@ -89,7 +89,8 @@ export const loginUser = async (formData: FormData): Promise<AuthActionResult> =
           : "Login failed. Please try again.",
     };
   }
-};
+}
+
 
 export const logoutUser = async (): Promise<void> => {
   await deleteCookie("accessToken");

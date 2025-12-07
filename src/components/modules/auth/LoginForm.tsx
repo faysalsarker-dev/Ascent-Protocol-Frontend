@@ -1,15 +1,13 @@
 "use client";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, ShieldCheck, Zap, AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { 
   GlitchText, 
-  ScanlineOverlay, 
-  DataStream, 
   CornerBracket,
   HexagonIcon,
   StatusBadge
@@ -19,20 +17,17 @@ import { Input } from "@/src/components/ui/input";
 import { Button } from "@/src/components/ui/button";
 import { Label } from "@/src/components/ui/label";
 import Link from "next/link";
+import { useLoginUser } from "@/src/hooks/useAuth";
+import { useState } from "react";
+import { LoginFormValues, loginSchema } from "@/src/schemas/auth.schema";
 
 // Login Schema
-const loginSchema = z.object({
-  email: z.string().email("Invalid hunter identification format"),
-  password: z.string().min(6, "Security code must be at least 6 characters"),
-});
 
-type LoginFormValues = z.infer<typeof loginSchema>;
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
+  const router = useRouter();
+  
   const {
     register,
     handleSubmit,
@@ -45,32 +40,20 @@ const LoginForm = () => {
     },
   });
 
-  const onSubmit = async (values: LoginFormValues) => {
-    setIsLoading(true);
-    setServerError(null);
-    
-    // Simulate API call - replace with actual login logic
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simulated success - replace with actual auth
-      toast.success("Hunter authentication successful!");
-      navigate("/today");
-    } catch (error) {
-      const message = "Authentication failed. Verify your credentials.";
-      setServerError(message);
-      toast.error(message);
-    } finally {
-      setIsLoading(false);
-    }
+  const { mutate: login, isPending, error } = useLoginUser({
+    onSuccess: (data) => {
+      toast.success(data.message || "Hunter authentication successful!");
+      router.push("/user");
+    },
+  });
+
+  const onSubmit = (values: LoginFormValues) => {
+    login(values);
   };
 
   return (
     <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
-      {/* Background Effects */}
       <ParticleBackground />
-     
-  
       
       {/* Ambient Glow */}
       <motion.div
@@ -151,7 +134,11 @@ const LoginForm = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.6 }}
             >
-              <StatusBadge label="SYSTEM" value="STANDBY" color="primary" />
+              <StatusBadge 
+                label="SYSTEM" 
+                value={isPending ? "AUTHENTICATING" : "STANDBY"} 
+                color="primary" 
+              />
             </motion.div>
           </div>
 
@@ -172,6 +159,7 @@ const LoginForm = () => {
                 <Input
                   type="email"
                   placeholder="hunter@system.com"
+                  disabled={isPending}
                   className={`bg-background/60 border-primary/30 focus:border-primary focus:ring-primary/30 placeholder:text-muted-foreground/50 ${
                     errors.email ? "border-destructive" : ""
                   }`}
@@ -217,6 +205,7 @@ const LoginForm = () => {
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
+                  disabled={isPending}
                   className={`bg-background/60 border-primary/30 focus:border-primary focus:ring-primary/30 pr-10 placeholder:text-muted-foreground/50 ${
                     errors.password ? "border-destructive" : ""
                   }`}
@@ -225,7 +214,8 @@ const LoginForm = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                  disabled={isPending}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -248,7 +238,7 @@ const LoginForm = () => {
 
             {/* Server Error Display */}
             <AnimatePresence>
-              {serverError && (
+              {error && (
                 <motion.div
                   className="relative p-4 bg-destructive/10 border border-destructive/30 rounded-sm"
                   initial={{ opacity: 0, scale: 0.95, height: 0 }}
@@ -273,7 +263,7 @@ const LoginForm = () => {
                         AUTHENTICATION FAILED
                       </p>
                       <p className="text-xs text-destructive/80 mt-1">
-                        {serverError}
+                        {error.message || "Verify your credentials and try again."}
                       </p>
                     </div>
                   </div>
@@ -289,22 +279,22 @@ const LoginForm = () => {
             >
               <Button
                 type="submit"
-                disabled={isLoading}
+                disabled={isPending}
                 className="w-full h-12 font-system text-sm uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground relative overflow-hidden group"
               >
                 {/* Button Glow Effect */}
                 <motion.div
-                  className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
                   initial={{ x: "-100%" }}
-                  animate={{ x: isLoading ? "100%" : "-100%" }}
+                  animate={{ x: isPending ? "100%" : "-100%" }}
                   transition={{ 
                     duration: 1, 
-                    repeat: isLoading ? Infinity : 0,
+                    repeat: isPending ? Infinity : 0,
                     ease: "linear"
                   }}
                 />
                 
-                {isLoading ? (
+                {isPending ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
                     AUTHENTICATING...

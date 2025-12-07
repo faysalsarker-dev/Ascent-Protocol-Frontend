@@ -26,20 +26,43 @@ export function useCreateUser(workoutPlanId: string) {
   });
 }
 
-export function useLoginUser() {
+
+
+interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+interface UseLoginUserOptions {
+  onSuccess?: (data: any) => void;
+  onError?: (error: any) => void;
+}
+
+export function useLoginUser(options?: UseLoginUserOptions) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data:{email:string,password:string}) => loginUser(data),
+    mutationFn: async (data: LoginPayload) => {
+      const result = await loginUser(data);
+      
+      if (!result.success) {
+        throw new Error(result.message || "Login failed");
+      }
+      
+      return result;
+    },
 
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["user-info"] });
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
+            options?.onSuccess?.(data);
+    },
 
- 
+    onError: (error) => {
+      options?.onError?.(error);
     },
   });
 }
-
 
 
 export function useGetMe() {

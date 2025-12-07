@@ -117,7 +117,7 @@ const WorkoutPlanCard: React.FC<WorkoutPlanCardProps> = ({ plan, index = 0 }) =>
             </div>
           </div>
 
-          <Link href={`/plan-details/${plan.id}`}>
+          <Link href={`/user/planDetails/${plan.id}`}>
             <Button
               className={`w-full group/btn relative overflow-hidden ${
                 plan.isActive 

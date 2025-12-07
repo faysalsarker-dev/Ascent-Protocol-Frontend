@@ -23,7 +23,7 @@ export default function AllPlansPage() {
 
       {/* Animated scan line */}
       <motion.div
-        className="fixed top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent pointer-events-none z-50"
+        className="fixed top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent pointer-events-none z-50"
         animate={{ y: ["0vh", "100vh"] }}
         transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
       />

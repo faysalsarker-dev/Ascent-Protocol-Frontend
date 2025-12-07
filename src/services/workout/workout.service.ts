@@ -158,6 +158,7 @@ export async function getWorkoutDaysByPlan(planId: string): Promise<ApiResponse<
 export async function getTodayWorkoutDay(): Promise<ApiResponse<WorkoutDay>> {
   try {
     const response = await dataFetch.get("/workout-days/today", {
+      // next: { tags: ["today-workout"] }, // Cache for 1 hour
       next: { tags: ["today-workout"], revalidate: 3600 }, // Cache for 1 hour
     });
     return response.json();
@@ -407,7 +408,19 @@ export async function getAllWorkoutSessions(
 export async function getCurrentWorkoutSession(): Promise<ApiResponse<WorkoutSession | null>> {
   try {
     const response = await dataFetch.get("/workout-sessions/current", {
-      cache: "no-store", // Always fetch fresh for current session
+      cache: "no-store", 
+    });
+    return response.json();
+  } catch (error) {
+    console.error("Get current session error:", error);
+    throw error;
+  }
+}
+
+export async function getLastWorkoutSession(): Promise<ApiResponse<WorkoutSession | null>> {
+  try {
+    const response = await dataFetch.get("/workout-sessions/last", {
+      next: { tags: ["last-workout"], revalidate: 3600 }
     });
     return response.json();
   } catch (error) {

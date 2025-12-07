@@ -5,45 +5,9 @@ import { motion } from "framer-motion";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import { AlertTriangle, FileX, Dumbbell } from "lucide-react";
 import WorkoutPlanCard from "./WorkoutPlanCard";
+import { useGetAllPlans } from "@/src/hooks/useWorkoutPlan";
 
-// Mock hook for demo - replace with actual implementation
-const useGetAllPlans = () => {
-  // Demo data for testing
-  return {
-    data: {
-      data: [
-        {
-          id: "1",
-          name: "Strength Protocol",
-          description: "Build raw power with compound lifts and progressive overload",
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          startDate: new Date().toISOString(),
-          endDate: null,
-          userId: "user1",
-          workoutDays: [],
-          _count: { workoutDays: 5 }
-        },
-        {
-          id: "2",
-          name: "Hypertrophy System",
-          description: "Maximize muscle growth with high volume training",
-          isActive: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          startDate: new Date().toISOString(),
-          endDate: null,
-          userId: "user1",
-          workoutDays: [],
-          _count: { workoutDays: 6 }
-        },
-      ]
-    },
-    isLoading: false,
-    isError: false
-  };
-};
+
 
 const AllWorkoutPlans = () => {
   const { data, isLoading, isError } = useGetAllPlans();

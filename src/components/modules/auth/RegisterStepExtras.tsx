@@ -78,6 +78,7 @@ export function RegisterStepExtras({
     control,
     handleSubmit,
     setValue,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     formState: { errors, isDirty },
   } = useForm<ExtrasForm>({
     resolver: zodResolver(extrasSchema),

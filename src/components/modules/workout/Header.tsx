@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/src/components/ui/button";
 import { Plus, Swords, Zap } from "lucide-react";
+import Link from "next/link";
 
 const AllPlansHeader = () => {
 
@@ -48,15 +49,16 @@ const AllPlansHeader = () => {
           whileTap={{ scale: 0.97 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
-          <Button
-            onClick={() => navigate("/workout-builder")}
-            className="flex items-center gap-2 font-medium group relative overflow-hidden"
-            size="lg"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-            <Plus className="w-5 h-5 group-hover:rotate-90 transition-all duration-300" />
-            <span className="relative z-10">CREATE PLAN</span>
-          </Button>
+        <Link href={'/user/my-workout/plan'}>
+            <Button
+              className="flex items-center gap-2 font-medium group relative overflow-hidden"
+              size="lg"
+            >
+              <div className="absolute inset-0 bg-linear-to-r from-primary/0 via-primary/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              <Plus className="w-5 h-5 group-hover:rotate-90 transition-all duration-300" />
+              <span className="relative z-10">CREATE PLAN</span>
+            </Button>
+        </Link>
         </motion.div>
       </div>
 

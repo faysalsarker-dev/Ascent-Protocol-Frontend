@@ -30,6 +30,18 @@ export function useCreateExerciseSet(sessionId: string) {
   });
 }
 
+
+export function useCreateExerciseSetBulk(sessionId: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: BulkSetPayload) => createBulkExerciseSets(sessionId, payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["exercise-sets"] });
+      qc.invalidateQueries({ queryKey: ["exercise-sets", sessionId] });
+    },
+  });
+}
+
 export function useCreateBulkExerciseSets(sessionId: string) {
   const qc = useQueryClient();
   return useMutation({

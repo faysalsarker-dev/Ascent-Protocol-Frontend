@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import {
   Drawer,
   DrawerContent,
@@ -19,92 +19,145 @@ import {
   Award,
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { Input } from "@/src/components/ui/input";
 import { Exercise, PreviousPerformance } from "@/src/types/workout";
 import {
   GlitchText,
   CornerBracket,
   ScanlineOverlay,
 } from "./GamifiedEffects";
-import { useCreateExerciseSet } from "@/src/hooks/useExerciseSets";
+import { useCreateExerciseSetBulk } from "@/src/hooks/useExerciseSets";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
+import { useEffect } from "react";
 
 interface ExerciseDrawerProps {
   exercise: Exercise | null;
-  currentSeasion?: any;
+  lastSession?: any;
   sessoinId: string;
   isOpen: boolean;
   onClose: () => void;
   onComplete: (exerciseId: string) => void;
 }
 
-interface FormValues {
+interface SetForm {
   reps: string;
   weight: string;
+}
+
+interface FormValues {
+  sets: SetForm[];
 }
 
 export const ExerciseDrawer = ({
   exercise,
   sessoinId,
-  currentSeasion,
+  lastSession,
   isOpen,
   onClose,
   onComplete,
 }: ExerciseDrawerProps) => {
-  const { register, handleSubmit, reset, watch } = useForm<FormValues>({
-    defaultValues: { reps: "", weight: "" },
+  const { mutate, isPending } = useCreateExerciseSetBulk(sessoinId);
+
+  const { control, register, handleSubmit, reset } = useForm<FormValues>({
+    defaultValues: {
+      sets: [],
+    },
   });
 
-  const { mutate, isPending } = useCreateExerciseSet(sessoinId);
+console.log(exercise,'lastsession from diualog');
 
-  // Dummy previous performance (replace with API later)
-  const previousPerformance: PreviousPerformance = {
-    date: "2024-01-10",
-    sets: [
-      { reps: 13, weight: 50 },
-      { reps: 12, weight: 50 },
-      { reps: 13, weight: 45 },
-    ],
-  };
+  const { fields, append, replace } = useFieldArray({
+    control,
+    name: "sets",
+  });
 
-  const onAdd = (data: FormValues) => {
+  /** AUTO GENERATE TARGET SETS WHEN EXERCISE OPENS */
+  useEffect(() => {
+    if (exercise?.targetSets) {
+      const autoSets = Array.from({ length: exercise.targetSets }, () => ({
+        reps: "",
+        weight: "",
+      }));
+      replace(autoSets);
+    }
+  }, [exercise]);
+
+;
+
+  const onSubmit = (data: FormValues) => {
     if (!exercise) return;
 
-    const existingSetsForExercise =
-      currentSeasion?.exerciseSets?.filter(
-        (s: any) => s.exerciseName === exercise.exerciseName
-      ) || [];
-
-    const nextSetNumber = existingSetsForExercise.length + 1;
+    const cleaned = data.sets.map((set, i) => ({
+      setNumber: i + 1,
+      reps: Number(set.reps),
+      weight: Number(set.weight),
+    }));
 
     const payload = {
       exerciseName: exercise.exerciseName,
       muscleGroup: exercise.muscleGroup,
-      setNumber: nextSetNumber,
-      reps: parseInt(data.reps),
-      weight: parseFloat(data.weight),
+      sets: cleaned,
     };
 
     mutate(payload, {
       onSuccess: () => {
-        reset(); // Clear the form
-        // Optionally refetch session to show new sets
+   const key = "completedExercises";
+const stored = JSON.parse(localStorage.getItem(key) || "[]");
+
+stored.push({
+  exerciseName: exercise.exerciseName,
+  date: Date.now(),
+  sessionId: sessoinId,
+});
+
+localStorage.setItem(key, JSON.stringify(stored));
+
+
+        reset();
+        onComplete(exercise.id);
+        onClose();
       },
     });
   };
 
-  const handleComplete = () => {
-    if (!exercise) return;
-    onComplete(exercise.id);
-    onClose();
-  };
-
   if (!exercise) return null;
 
-  const watchReps = watch("reps");
-  const watchWeight = watch("weight");
+
+
+
+
+
+// extract dynamic previous performance
+const previousPerformance: PreviousPerformance | null = (() => {
+  if (!lastSession?.exerciseSets || !exercise?.exerciseName) return null;
+
+  const filtered = lastSession?.exerciseSets
+    .filter((s: any) => s?.exerciseName === exercise.exerciseName)
+    .sort((a: any, b: any) => a?.setNumber - b?.setNumber);
+
+  if (filtered.length === 0) return null;
+
+  return {
+    date: lastSession.createdAt || filtered[0].createdAt,
+    sets: filtered.map((s: any) => ({
+      reps: s?.reps,
+      weight: s?.weight,
+    })),
+  };
+})();
+
+
+
+
+
+
+
+
+
+
 
   return (
-    <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Drawer open={isOpen} onOpenChange={() => onClose()}>
       <DrawerContent className="bg-background/95 backdrop-blur-xl border-t border-primary/40 overflow-hidden">
         <ScrollArea className="h-full">
           <ScanlineOverlay />
@@ -136,8 +189,8 @@ export const ExerciseDrawer = ({
               </div>
             </DrawerHeader>
 
-            {/* PREVIOUS PERFORMANCE */}
-            <motion.div
+            {/* PREVIOUS DAY */}
+                  <motion.div
               className="relative mb-5 p-4 rounded-sm bg-card/30 border border-accent/30 overflow-hidden"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -155,7 +208,7 @@ export const ExerciseDrawer = ({
                 </div>
 
                 <div className="flex gap-2">
-                  {previousPerformance.sets.map((set, i) => (
+                  {previousPerformance?.sets.map((set, i) => (
                     <motion.div
                       key={i}
                       className="flex-1 p-3 rounded-sm bg-background/50 border border-border/30 text-center"
@@ -178,116 +231,70 @@ export const ExerciseDrawer = ({
               </div>
             </motion.div>
 
+
             {/* SYSTEM MESSAGE */}
-            <motion.div
-              className="flex items-start gap-3 mb-5 p-3 rounded-sm bg-primary/5 border border-primary/20"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <MessageSquare className="w-4 h-4 text-primary mt-0.5" />
-              </motion.div>
-              <p className="text-xs text-primary/90 font-mono leading-relaxed">
-                ◆ SYSTEM: Exceed your limits. Shadow extraction awaits the
-                worthy. ◆
+            <motion.div className="flex items-start gap-3 mb-5 p-3 rounded-sm bg-primary/5 border border-primary/20">
+              <MessageSquare className="w-4 h-4 text-primary mt-0.5" />
+              <p className="text-xs text-primary/90 font-mono">
+                ◆ SYSTEM: Log all required sets before completing. ◆
               </p>
             </motion.div>
 
-            {/* SINGLE INPUT SET USING REACT HOOK FORM */}
-            <form onSubmit={handleSubmit(onAdd)} className="space-y-4 mb-6">
+            {/* SET INPUT FIELDS */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <h4 className="text-xs text-muted-foreground flex items-center gap-2 font-mono uppercase tracking-wider">
                 <Swords className="w-4 h-4 text-primary" />
-                Log Your Set
+                Log Sets
               </h4>
 
-              <div className="flex items-center gap-3 p-3 rounded-sm bg-card/20 border border-border/30">
-                <input
-                  type="number"
-                  placeholder="Reps"
-                  {...register("reps", { required: true })}
-                  className="w-full px-3 py-2 rounded-sm bg-background/50 border border-border/40
-                  text-center text-sm font-mono focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
-                />
+              <div className="space-y-3">
+                {fields.map((f, index) => (
+                  <div
+                    key={f.id}
+                    className="flex items-center gap-3 p-3 rounded-sm bg-card/20 border border-border/30"
+                  >
+                    <Input
+                      type="number"
+                      placeholder="Reps"
+                      {...register(`sets.${index}.reps`, { required: true })}
+                      className="font-mono text-center"
+                    />
 
-                <input
-                  type="number"
-                  placeholder="Weight (kg)"
-                  {...register("weight", { required: true })}
-                  className="w-full px-3 py-2 rounded-sm bg-background/50 border border-border/40
-                  text-center text-sm font-mono focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
-                />
-
-                <Button
-                  type="submit"
-                  disabled={isPending || !watchReps || !watchWeight}
-                  className="h-9 gap-1 font-mono text-xs disabled:opacity-60 disabled:pointer-events-none"
-                >
-                  {isPending ? "Adding..." : <Plus className="w-3 h-3" />}
-                  Add
-                </Button>
+                    <Input
+                      type="number"
+                      placeholder="Weight (kg)"
+                      {...register(`sets.${index}.weight`, { required: true })}
+                      className="font-mono text-center"
+                    />
+                  </div>
+                ))}
               </div>
+
+              {/* ADD EXTRA SET */}
+              <Button
+                type="button"
+                variant="secondary"
+                className="w-full font-mono text-xs"
+                onClick={() => append({ reps: "", weight: "" })}
+              >
+                <Plus className="w-3 h-3 mr-1" /> Add Extra Set
+              </Button>
+
+              {/* COMPLETE BUTTON */}
+              <Button
+                type="submit"
+                className="w-full font-mono text-xs"
+                disabled={isPending}
+              >
+                {isPending ? "Saving..." : "Complete Exercise"}
+              </Button>
             </form>
 
-            {/* DISPLAY ALL SETS */}
-            <AnimatePresence>
-              {currentSeasion?.exerciseSets
-                ?.filter((s: any) => s.exerciseName === exercise.exerciseName)
-                .map((set: any, i: number) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className="p-3 rounded-sm bg-background/30 border border-border/40 flex items-center justify-between"
-                  >
-                    <span className="font-mono text-sm text-primary">
-                      Set {set.setNumber}: {set.reps} reps × {set.weight}kg
-                    </span>
-                  </motion.div>
-                ))}
-            </AnimatePresence>
-
-            {/* COMPLETE BUTTON */}
-            <motion.button
-              className="relative w-full py-4 px-6 rounded-sm bg-linear-to-r from-primary to-primary/80 text-primary-foreground font-mono font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 overflow-hidden"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleComplete}
-              style={{
-                boxShadow: "0 0 20px hsl(var(--primary) / 0.4)",
-              }}
-            >
-              <motion.div
-                className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent"
-                animate={{ x: ["-100%", "100%"] }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  repeatDelay: 1,
-                }}
-              />
-
-              <Award className="w-5 h-5" />
-              <span>Complete Exercise</span>
-              <ChevronRight className="w-5 h-5" />
-            </motion.button>
-
-            {/* XP PREVIEW */}
-            <motion.div
-              className="flex items-center justify-center gap-2 mt-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
+            {/* XP */}
+            <div className="flex items-center justify-center gap-2 mt-4">
               <Zap className="w-4 h-4 text-yellow-500" />
-              <span className="text-xs font-mono text-yellow-500">
-                +25 XP on completion
-              </span>
-            </motion.div>
+              <span className="text-xs font-mono text-yellow-500">+25 XP</span>
+            </div>
           </div>
         </ScrollArea>
       </DrawerContent>

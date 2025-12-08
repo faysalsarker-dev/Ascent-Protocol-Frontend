@@ -1,9 +1,14 @@
+import FeaturesSection from "@/src/components/modules/landing/FeaturesSection";
+import HeroSection from "@/src/components/modules/landing/HeroSection";
+import RankSystemSection from "@/src/components/modules/landing/RankSystemSection";
 
 
 const page = () => {
     return (
         <div>
-           hello common layout page 
+           <HeroSection/>
+           <FeaturesSection/>
+           <RankSystemSection/>
         </div>
     );
 };

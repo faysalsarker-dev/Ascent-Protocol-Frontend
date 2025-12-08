@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ParticleBackground } from '@/src/components/modules/today-task/ParticleBackground';
 import { Header } from '@/src/components/modules/today-task/Header';
@@ -27,8 +27,11 @@ const {mutate}=useCreateWorkoutSession()
 
   const workoutDay = data?.data ?? {};
 
-  console.log(lastSesson,'currentSesson')
+  console.log(lastSesson,'lastSesson')
   const exercises = workoutDay.exercises ?? [];
+
+
+  const stored = JSON.parse(localStorage.getItem('completedExercises') || "[]");
 
   const [completedExercises, setCompletedExercises] = useState<Set<string>>(new Set());
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
@@ -218,7 +221,7 @@ const {mutate}=useCreateWorkoutSession()
       <ExerciseDrawer
         exercise={selectedExercise}
         sessoinId={currentSesson?.data?.id}
-        currentSeasion={currentSesson?.data}
+        lastSession={lastSesson?.data}
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
         onComplete={handleCompleteExercise}

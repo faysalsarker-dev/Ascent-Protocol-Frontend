@@ -21,9 +21,12 @@ const DNAAnimationBackground = ({
 }: DNAAnimationBackgroundProps) => {
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+useEffect(() => {
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  setMounted(true);
+}, []);
+
+
 
   if (!mounted) {
     return (
@@ -36,7 +39,7 @@ const DNAAnimationBackground = ({
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden">
       {/* Deep space gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[oklch(0.06_0.02_280)] via-[oklch(0.08_0.02_280)] to-[oklch(0.06_0.02_280)]" />
+      <div className="absolute inset-0 bg-linear-to-b from-[oklch(0.06_0.02_280)] via-[oklch(0.08_0.02_280)] to-[oklch(0.06_0.02_280)]" />
       
       {/* Dynamic glow effects based on current color */}
       <div className="absolute inset-0 transition-all duration-1000">

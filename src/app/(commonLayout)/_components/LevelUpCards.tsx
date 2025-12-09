@@ -153,7 +153,7 @@ const CardItem = ({ card, index, onInView }: CardItemProps) => {
       <div className="relative">
         {/* Outer glow */}
         <motion.div 
-          className={`absolute -inset-8 bg-gradient-to-r ${card.accentColor} opacity-0 blur-3xl rounded-3xl`}
+          className={`absolute -inset-8 bg-linear-to-r ${card.accentColor} opacity-0 blur-3xl rounded-3xl`}
           whileInView={{ opacity: 0.3 }}
           transition={{ duration: 0.8 }}
         />
@@ -169,17 +169,7 @@ const CardItem = ({ card, index, onInView }: CardItemProps) => {
           }}
         >
           {/* Animated border gradient */}
-          <div className="absolute inset-0 rounded-2xl overflow-hidden">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              className="absolute -inset-[200%]"
-              style={{
-                background: `conic-gradient(from 0deg, ${card.primaryHex}, transparent 30%, ${card.secondaryHex}, transparent 60%, ${card.primaryHex})`,
-                opacity: 0.5,
-              }}
-            />
-          </div>
+        
           
           {/* Content */}
           <div className="relative p-6 md:p-8">
@@ -195,7 +185,7 @@ const CardItem = ({ card, index, onInView }: CardItemProps) => {
                     ]
                   }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className={`p-3.5 rounded-xl bg-gradient-to-br ${card.accentColor} text-black`}
+                  className={`p-3.5 rounded-xl bg-linear-to-br ${card.accentColor} text-black`}
                 >
                   {card.icon}
                 </motion.div>
@@ -217,7 +207,7 @@ const CardItem = ({ card, index, onInView }: CardItemProps) => {
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className={`w-14 h-14 rounded-xl bg-gradient-to-br ${card.accentColor} flex items-center justify-center`}
+                className={`w-14 h-14 rounded-xl bg-linear-to-br ${card.accentColor} flex items-center justify-center`}
                 style={{ boxShadow: `0 0 40px ${card.primaryHex}70` }}
               >
                 <span className="text-2xl font-black text-black">{card.rank}</span>
@@ -261,12 +251,12 @@ const CardItem = ({ card, index, onInView }: CardItemProps) => {
                   initial={{ width: 0 }}
                   whileInView={{ width: `${card.progress}%` }}
                   transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
-                  className={`h-full rounded-full bg-gradient-to-r ${card.accentColor} relative`}
+                  className={`h-full rounded-full bg-linear-to-r ${card.accentColor} relative`}
                 >
                   <motion.div
                     animate={{ x: ["-100%", "200%"] }}
                     transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 0.5 }}
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                    className="absolute inset-0 bg-linear-to-r from-transparent via-white/50 to-transparent"
                   />
                 </motion.div>
               </div>

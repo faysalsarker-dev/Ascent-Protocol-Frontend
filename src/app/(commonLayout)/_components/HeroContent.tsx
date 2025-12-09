@@ -94,28 +94,7 @@ const HeroContent = () => {
         </Button>
       </motion.div>
 
-      {/* Stats */}
-      <motion.div 
-        variants={itemVariants}
-        className="grid grid-cols-3 gap-6 pt-8 border-t border-border/20"
-      >
-        {[
-          { value: "50K+", label: "Active Hunters", color: "text-primary" },
-          { value: "1M+", label: "Quests Completed", color: "text-secondary" },
-          { value: "98%", label: "Level Up Rate", color: "text-success" },
-        ].map((stat) => (
-          <motion.div 
-            key={stat.label}
-            className="text-center lg:text-left"
-            whileHover={{ scale: 1.05 }}
-          >
-            <div className={`font-display text-2xl md:text-3xl font-bold ${stat.color}`}>
-              {stat.value}
-            </div>
-            <div className="text-sm text-muted-foreground">{stat.label}</div>
-          </motion.div>
-        ))}
-      </motion.div>
+    
     </motion.div>
   );
 };

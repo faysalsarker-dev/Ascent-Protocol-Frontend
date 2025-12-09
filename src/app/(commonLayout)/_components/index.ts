@@ -12,3 +12,4 @@ export { default as DNAHelix } from './DNAHelix';
 export { default as FloatingParticles3D } from './FloatingParticles3D';
 export { default as LevelUpCards } from './LevelUpCards';
 export { default as GeneticProgressSection } from './GeneticProgressSection';
+export { default as HeroAnimations } from './HeroAnimations';

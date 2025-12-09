@@ -16,7 +16,7 @@ export interface FeatureItem {
   title: string;
   description: string;
   icon: string;           
-  color?: FeatureColor | string;
+  color?: FeatureColor | string | undefined;
 
 }
 
@@ -68,7 +68,7 @@ const getColorClasses = (color: FeatureColor ) => {
 
 // ---------- Component ----------
 export default function FeaturesCard({ feature, index }: FeaturesCardProps) {
-  const colors = getColorClasses(feature.color);
+  const colors = getColorClasses((feature.color ?? "success") as FeatureColor);
 
   // Lookup icon from iconMap
   const Icon: LucideIcon | undefined = iconMap[feature.icon.toLowerCase()];
@@ -81,7 +81,7 @@ export default function FeaturesCard({ feature, index }: FeaturesCardProps) {
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ y: -8, transition: { duration: 0.2 } }}
-      className={`group relative bg-card-gradient rounded-2xl p-6 border ${colors.border} ${colors.glow} transition-all duration-300`}
+      className={`group relative bg-muted/30 rounded-2xl p-6 border ${colors.border} ${colors.glow} transition-all duration-300`}
     >
       {/* Icon */}
       <motion.div

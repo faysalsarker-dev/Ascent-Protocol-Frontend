@@ -9,7 +9,7 @@ export default function commonLayout({
     <main >
   
         {children}
-    
+   
     </main>
   );
 }

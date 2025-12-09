@@ -1,8 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Zap, Sparkles, Trophy } from "lucide-react";
+import { Zap, Sparkles, Trophy, ChevronRight } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import Link from "next/link";
 
 export default function HeroAnimations() {
   return (
@@ -11,97 +12,119 @@ export default function HeroAnimations() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
         className="mb-8"
       >
         <div className="relative inline-flex">
-          <div className="absolute -inset-px rounded-full bg-linear-to-r from-primary via-secondary to-primary bg-size-[200%_100%] animate-[shimmer_2s_linear_infinite]" />
-          <span className="relative inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background text-sm text-muted-foreground">
+          {/* Shimmer border */}
+          <div 
+            className="absolute -inset-px rounded-full animate-shimmer"
+            style={{
+              background: `linear-gradient(90deg, hsl(0.9 0.2 180) 0%, hsl(0.4 0.15 300) 50%, hsl(0.9 0.2 180) 100%)`,
+              backgroundSize: "200% 100%"
+            }}
+          />
+          <span className="relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-background text-sm font-medium text-muted-foreground">
             <Sparkles className="w-4 h-4 text-accent" />
             Now in Beta — Free Access
           </span>
         </div>
       </motion.div>
 
-      {/* Heading */}
+      {/* Main Heading */}
       <motion.h1
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-[1.1] mb-6"
+        transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
+        className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-[1.05] mb-6 tracking-tight"
       >
         <span className="text-foreground">Become the</span>
         <br />
-        <span className="text-gradient glow-text">Strongest Hunter</span>
+        <span className="text-secondary">Strongest Hunter</span>
       </motion.h1>
 
       {/* Subtitle */}
       <motion.p
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed"
+        transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+        className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed"
       >
         The AI-powered fitness system inspired by Solo Leveling. 
         Complete daily quests, level up your stats, and unlock your true potential.
       </motion.p>
 
-      {/* CTA */}
+      {/* CTA Buttons */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.3 }}
-        className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
+        transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
+        className="flex flex-col sm:flex-row gap-4 justify-center mb-20"
       >
-        <Button size="lg" className="group">
-          <Zap className="w-5 h-5" />
-          Start Your Journey
-          <motion.span
-            className="inline-block"
-            animate={{ x: [0, 4, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-          >
-            →
-          </motion.span>
-        </Button>
+    <Link href="/register">
+          <Button size="lg"  className="group text-base">
+            <Zap className="w-5 h-5" />
+            Start Your Journey
+            <motion.span
+              className="inline-flex"
+              animate={{ x: [0, 4, 0] }}
+              transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </motion.span>
+          </Button>
+    </Link>
+       
       </motion.div>
 
-      {/* Floating Card 1 */}
+      {/* Floating Card - Level Up */}
       <motion.div
-        className="absolute top-1/4 right-[15%] hidden lg:block"
-        animate={{ y: [0, -15, 0] }}
-        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute top-[15%] right-[2%] xl:right-[5%] 2xl:right-[10%] hidden xl:block"
+        initial={{ opacity: 0, x: 50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.5 }}
       >
-        <div className="bg-muted/30 rounded-xl p-4 glow-box">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-linear-to-br from-primary to-secondary flex items-center justify-center">
-              <Zap className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-foreground">Level Up!</div>
-              <div className="text-xs text-muted-foreground">+500 XP earned</div>
+        <motion.div
+          animate={{ y: [0, -12, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        >
+          <div className="bg-muted/30 rounded-2xl p-5 glow-box">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-linear-to-br from-primary to-primary/70">
+                <Zap className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <div className="text-left">
+                <div className="text-sm font-semibold text-foreground">Level Up!</div>
+                <div className="text-xs text-muted-foreground">+500 XP earned</div>
+              </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
 
-      {/* Floating Card 2 */}
+      {/* Floating Card - Quest Complete */}
       <motion.div
-        className="absolute bottom-1/3 left-[10%] hidden lg:block"
-        animate={{ y: [0, 15, 0] }}
-        transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute bottom-[30%] left-[2%] xl:left-[5%] 2xl:left-[10%] hidden xl:block"
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.7 }}
       >
-        <div className="bg-muted/30 rounded-xl p-4 glow-box">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-linear-to-br from-accent to-accent/70 flex items-center justify-center">
-              <Trophy className="w-5 h-5 text-accent-foreground" />
-            </div>
-            <div>
-              <div className="text-sm font-semibold text-foreground">Quest Complete</div>
-              <div className="text-xs text-muted-foreground">Daily mission done</div>
+        <motion.div
+          animate={{ y: [0, 12, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        >
+          <div className="bg-muted/30 rounded-2xl p-5 glow-box">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-linear-to-br from-accent to-accent/70">
+                <Trophy className="w-6 h-6 text-accent-foreground" />
+              </div>
+              <div className="text-left">
+                <div className="text-sm font-semibold text-foreground">Quest Complete</div>
+                <div className="text-xs text-muted-foreground">Daily mission done</div>
+              </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
     </>
   );

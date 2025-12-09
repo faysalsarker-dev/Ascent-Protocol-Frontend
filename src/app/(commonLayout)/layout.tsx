@@ -1,5 +1,4 @@
-import Footer from "@/src/components/shared/Footer";
-import Navbar from "@/src/components/shared/Navbar";
+
 
 export default function commonLayout({
   children,
@@ -10,17 +9,16 @@ export default function commonLayout({
 
   
    
-   <> 
-   <Navbar/>
+    
+
    
-    <main className="mt-14">
+    <main>
 
      {children}
 
   </main>
 
-     <Footer/>
-   </>
+ 
       
  
   

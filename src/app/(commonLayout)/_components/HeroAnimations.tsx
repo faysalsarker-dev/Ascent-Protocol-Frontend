@@ -15,7 +15,7 @@ export default function HeroAnimations() {
         className="mb-8"
       >
         <div className="relative inline-flex">
-          <div className="absolute -inset-px rounded-full bg-linear-to-r from-primary via-secondary to-primary bg-[length:200%_100%] animate-[shimmer_2s_linear_infinite]" />
+          <div className="absolute -inset-px rounded-full bg-linear-to-r from-primary via-secondary to-primary bg-size-[200%_100%] animate-[shimmer_2s_linear_infinite]" />
           <span className="relative inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background text-sm text-muted-foreground">
             <Sparkles className="w-4 h-4 text-accent" />
             Now in Beta — Free Access

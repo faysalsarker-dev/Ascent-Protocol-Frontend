@@ -11,7 +11,7 @@ const GeneticProgressSection = () => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const lastScrollY = useRef(0);
-  const velocityTimeout = useRef<NodeJS.Timeout>();
+const velocityTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,

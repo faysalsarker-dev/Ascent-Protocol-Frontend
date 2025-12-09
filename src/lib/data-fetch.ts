@@ -67,7 +67,7 @@ const attachAuthHeader = async (headers?: HeadersInit) => {
   return normalized;
 };
 
-const refreshTokens = async () => {
+export const refreshTokens = async () => {
   const refreshToken = await getCookie("refreshToken");
 
   if (!refreshToken) {

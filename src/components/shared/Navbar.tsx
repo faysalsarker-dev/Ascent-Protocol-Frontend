@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/src/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/src/components/ui/sheet";
 import { Menu, X } from "lucide-react";
+import NavAction from "../modules/appbar/navActiop";
 
 const navLinks = [
   { title: "Home", href: "/" },
@@ -14,13 +15,13 @@ const navLinks = [
   { title: "Chat with AI", href: "/chat" },
 ];
 
-export default function Navbar() {
+export default function Navbar({ user }: { user: any }) {
   const pathname = usePathname();
   const [visible, setVisible] = useState(true);
   const [lastY, setLastY] = useState(0);
   const [open, setOpen] = useState(false);
 
-  // Hide on scroll down
+
   useEffect(() => {
     const handleScroll = () => {
       const y = window.scrollY;
@@ -40,11 +41,9 @@ export default function Navbar() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -80, opacity: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
-          className="fixed top-0 left-0 w-full z-[99] bg-background/70 backdrop-blur-xl border-b border-border/30"
+          className="fixed top-0 left-0 w-full z-99 bg-background/70 backdrop-blur-xl border-b border-border/30"
         >
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            
-            {/* Logo */}
             <Link
               href="/"
               className="text-2xl md:text-3xl font-extrabold tracking-tight text-primary"
@@ -52,7 +51,6 @@ export default function Navbar() {
               Ascent <span className="text-accent">Protocol</span>
             </Link>
 
-            {/* Desktop Nav */}
             <nav className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
                 <Link
@@ -70,26 +68,20 @@ export default function Navbar() {
                     {link.title}
                   </span>
 
-                  {/* Hover + Active underline animation */}
                   <motion.span
                     layoutId="navbar-underline"
-                    className={`absolute left-0 -bottom-1 h-[2px] bg-accent ${
-                      pathname === link.href ? "w-full" : "w-0 group-hover:w-full transition-all duration-300"
+                    className={`absolute left-0 -bottom-1 h-0.5 bg-accent ${
+                      pathname === link.href
+                        ? "w-full"
+                        : "w-0 group-hover:w-full transition-all duration-300"
                     }`}
                   />
                 </Link>
               ))}
 
-              {/* Auth Buttons */}
-              <Link href="/login">
-                <Button size="sm" variant="outline">Login</Button>
-              </Link>
-              <Link href="/register">
-                <Button size="sm">Register</Button>
-              </Link>
+              <NavAction user={user} />
             </nav>
 
-            {/* Mobile Nav */}
             <div className="md:hidden">
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger>
@@ -126,12 +118,24 @@ export default function Navbar() {
                       </motion.div>
                     ))}
 
-                    <Link href="/login" onClick={() => setOpen(false)}>
-                      <Button className="w-full" variant="outline">Login</Button>
-                    </Link>
-                    <Link href="/register" onClick={() => setOpen(false)}>
-                      <Button className="w-full">Register</Button>
-                    </Link>
+                    {user ? (
+                      <Link href="/logout" onClick={() => setOpen(false)}>
+                        <Button className="w-full" variant="outline">
+                          Logout
+                        </Button>
+                      </Link>
+                    ) : (
+                      <>
+                        <Link href="/login" onClick={() => setOpen(false)}>
+                          <Button className="w-full" variant="outline">
+                            Login
+                          </Button>
+                        </Link>
+                        <Link href="/register" onClick={() => setOpen(false)}>
+                          <Button className="w-full">Register</Button>
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </SheetContent>
               </Sheet>

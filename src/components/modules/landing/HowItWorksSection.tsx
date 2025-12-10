@@ -78,7 +78,7 @@ const HowItWorksSection = () => {
 
           {/* Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {steps.map((item, index) => (
+            {steps.map((item:HowItWorkItem, index:number) => (
               <HowItWorkCard key={index} item={item} index={index} totalSteps={4} />
             ))}
           </div>

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import ChatSidebar from "./ChatSidebar";
 import MessageList from "./MessageList";
@@ -58,7 +58,7 @@ const msg = data?.data || []
   const message = { message: content };
 
   try {
-    const result = await mutateAsync(message); 
+  await mutateAsync(message); 
     refetch()
   } catch (err) {
     console.error("Failed to send message:", err);
@@ -72,7 +72,7 @@ const msg = data?.data || []
   };
 
   return (
-    <div className="flex h-screen bg-background ">
+    <div className="flex h-screen bg-background/30 ">
       <ChatSidebar
         selectedDate={selectedDate}
         onSelectDate={handleSelectDate}

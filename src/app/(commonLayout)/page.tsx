@@ -1,16 +1,10 @@
 import { Metadata } from "next";
 import dynamic from "next/dynamic";
-
-
-
-// Landing Sections
 import HeroSection from "@/src/components/modules/landing/HeroSection";
 import FeaturesSection from "@/src/components/modules/landing/FeaturesSection";
 import RankSystemSection from "@/src/components/modules/landing/RankSystemSection";
 import HowItWorksSection from "@/src/components/modules/landing/HowItWorksSection";
 import GoldenChanceSection from "@/src/components/modules/landing/GoldenChanceSection";
-
-// Lazy-loaded Server Component
 const GeneticProgressSection = dynamic(
   () => import("./_components/dna/GeneticProgressSection")
 );

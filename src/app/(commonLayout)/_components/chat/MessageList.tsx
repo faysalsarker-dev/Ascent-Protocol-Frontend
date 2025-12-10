@@ -1,7 +1,7 @@
-import { Loader2 } from "lucide-react";
 import MessageBubble from "./MessageBubble";
 import { useEffect } from "react";
 import { Message } from "./ChatLayout";
+import  TypingIndicator  from "./TypingIndicator";
 import { ScrollArea } from "@/src/components/ui/scroll-area";
 
 const MessageList = ({ messages, isLoading }: { messages: Message[], isLoading: boolean }) => {
@@ -13,7 +13,7 @@ const MessageList = ({ messages, isLoading }: { messages: Message[], isLoading: 
   }, [messages]);
 
   return (
-    <div id="message-container" className="flex-1 overflow-y-auto">
+    <div id="message-container" className="flex-1 overflow-y-auto bg-muted/30">
    <ScrollArea className="h-full" >
         <div className="max-w-3xl mx-auto">
           {messages.length === 0 && !isLoading && (
@@ -33,21 +33,18 @@ const MessageList = ({ messages, isLoading }: { messages: Message[], isLoading: 
           ))}
   
           {isLoading && (
-            <div className="bg-secondary/50 px-4 py-6">
-              <div className="max-w-3xl mx-auto flex gap-4">
-                <div className="w-8 h-8 rounded-sm bg-muted flex items-center justify-center">
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium mb-1">Assistant</p>
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-2 h-2 bg-foreground rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                  </div>
-                </div>
-              </div>
-            </div>
+           <div className="flex gap-4">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
+            </svg>
+             <TypingIndicator/>
+           </div>
+          
           )}
   
           <div className="h-32" />

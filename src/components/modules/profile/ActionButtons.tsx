@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Key, LogOut, Shield, AlertTriangle } from "lucide-react";
-import { toast } from "@/src/hooks/use-toast";
 import { LogoutDialog } from "../../shared/LogoutDialog";
 import { useState } from "react";
 
@@ -11,12 +10,7 @@ interface ActionButtonsProps {
 export const ActionButtons = ({ onChangePassword }: ActionButtonsProps) => {
     const [logoutDialog, setLogoutDialog] = useState(false);
 
-  const handleLogout = () => {
-    toast({
-      title: "◆ System Notice ◆",
-      description: "Hunter has disconnected from the system.",
-    });
-  };
+
 
   return (
     <motion.div

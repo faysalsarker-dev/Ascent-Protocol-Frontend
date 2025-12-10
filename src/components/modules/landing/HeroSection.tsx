@@ -1,3 +1,5 @@
+
+
 import { HeroAnimations } from "@/src/app/(commonLayout)/_components";
 
   const secondaryOKLCH = "0.4 0.15 300"; 

@@ -3,22 +3,10 @@
 import { motion } from "framer-motion";
 import { iconMap } from "@/src/utils/iconMap";
 import { LucideIcon } from "lucide-react";
+import { FeatureColor, FeatureItem } from "@/src/components/modules/landing/FeaturesSection";
 
 // ---------- Types ----------
-export type FeatureColor =
-  | "primary"
-  | "secondary"
-  | "success"
-  | "warning"
-  | "accent";
 
-export interface FeatureItem {
-  title: string;
-  description: string;
-  icon: string;           
-  color?: FeatureColor | string | undefined;
-
-}
 
 interface FeaturesCardProps {
   feature: FeatureItem;

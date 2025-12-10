@@ -1,5 +1,22 @@
 import { FeaturesCard, SectionHeader } from "@/src/app/(commonLayout)/_components";
-import { FeatureItem } from "@/src/app/(commonLayout)/_components/features/FeaturesCard";
+
+
+export type FeatureColor =
+  | "primary"
+  | "secondary"
+  | "success"
+  | "warning"
+  | "accent";
+
+
+
+export interface FeatureItem {
+  title: string;
+  description: string;
+  icon: string;           
+  color?: FeatureColor | string | undefined;
+
+}
 
 const features:FeatureItem[] = [
   {
@@ -72,7 +89,7 @@ const FeaturesSection = () => {
 
         {/* Features Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {features.map((feature, index) => (
+          {features.map((feature:FeatureItem, index:number) => (
             <FeaturesCard key={index} feature={feature} index={index} />
           ))}
         </div>

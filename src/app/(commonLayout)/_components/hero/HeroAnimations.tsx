@@ -57,7 +57,7 @@ export default function HeroAnimations() {
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-        className="flex flex-col sm:flex-row gap-4 justify-center mb-20"
+        className="flex  sm:flex-row gap-4 justify-center mb-20 px-4"
       >
     <Link href="/register">
           <Button size="lg"  className="group text-base">
@@ -72,6 +72,8 @@ export default function HeroAnimations() {
             </motion.span>
           </Button>
     </Link>
+
+ 
        
       </motion.div>
 

@@ -1,4 +1,6 @@
-import { Crown, Shield, Sword, Flame, Star, Zap } from "lucide-react";
+
+
+
 import AnimatedOrbs from '@/src/components/ui/Animated-Orbs';
 import { RanksCard, SectionHeader } from "@/src/app/(commonLayout)/_components";
 
@@ -13,7 +15,6 @@ export type RankItem = {
   color: string; 
   borderColor: string; 
   textColor: string; 
-
   icon: string; 
 };
 
@@ -121,29 +122,11 @@ const RankSystemSection = () => {
 
 
 
-        {/* Section Header */}
-        {/* <motion.div 
-          className="text-center max-w-3xl mx-auto mb-20 space-y-6"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-accent/30 bg-accent/5 backdrop-blur-sm">
-            <Crown className="h-4 w-4 text-accent" />
-            <span className="text-sm font-semibold text-accent uppercase tracking-wide">Ranking System</span>
-          </div>
-          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
-           
-          </h2>
-          <p className="text-lg text-muted-foreground">
-         
-          </p>
-        </motion.div> */}
+      
 
         {/* Ranks Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {ranks.map((rank, index) => (
+          {ranks.map((rank:RankItem, index:number) => (
           <RanksCard key={index} rank={rank} index={index} />
           ))}
         </div>

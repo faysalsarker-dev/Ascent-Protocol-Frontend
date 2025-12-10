@@ -10,7 +10,6 @@ type RanksCardProps = {
 };
 
 const RanksCard = ({ rank, index }: RanksCardProps) => {
-  // Convert icon string → actual component
   const Icon = iconMap[rank.icon.toLowerCase()] ?? iconMap["star"];
 
   return (

@@ -9,7 +9,7 @@ const backgroundOKLCH = "0.12 0.01 300";
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden mt-14">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden ">
       {/* Deep Background */}
       <div className="absolute inset-0 bg-background" />
 

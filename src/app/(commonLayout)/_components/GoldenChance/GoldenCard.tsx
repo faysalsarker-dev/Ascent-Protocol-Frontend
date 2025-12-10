@@ -59,8 +59,8 @@ const GoldenCard = () => {
       {/* CTA Button */}
       <div className="flex flex-col items-center gap-4 mb-4">
         <Link href="/register">
-          <Button size="lg" className="px-10 flex items-center gap-2 border border-warning/40 text-primary hover:bg-success/10">
-            <Gift className="h-5 w-5 text-success" /> Claim Free Access <Sparkles className="h-4 w-4 text-success" />
+          <Button size="lg" className="px-10 bg-warning flex items-center gap-2 border border-warning/40 text-white hover:bg-success/10">
+            <Gift className="h-5 w-5 text-white" /> Claim Free Access <Sparkles className="h-4 w-4 text-white" />
           </Button>
         </Link>
       </div>
@@ -69,8 +69,8 @@ const GoldenCard = () => {
       <div className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
         {info.map((item) => (
           <div key={item.text} className="flex items-center gap-1">
-            <item.icon className="h-4 w-4 text-success" />
-            <span className="text-primary">{item.text}</span>
+            <item.icon className="h-4 w-4 text-white" />
+            <span className="text-white">{item.text}</span>
           </div>
         ))}
       </div>

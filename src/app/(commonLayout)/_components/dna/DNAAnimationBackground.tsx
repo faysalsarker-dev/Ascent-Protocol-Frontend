@@ -4,7 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Stars, Float } from "@react-three/drei";
 import DNAHelix from "./DNAHelix";
-import FloatingParticles3D from "./FloatingParticles3D";
+import FloatingParticles3D from "../common/FloatingParticles3D";
 
 interface DNAAnimationBackgroundProps {
   scrollProgress: number;

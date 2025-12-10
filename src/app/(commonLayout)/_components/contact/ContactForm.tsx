@@ -9,7 +9,7 @@ import { Textarea } from "@/src/components/ui/textarea";
 import { Mail, MapPin, Phone, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useTransition } from "react";
-import { contact } from "@/src/services/workout/contact.service";
+import { contact } from "@/src/services/contact/contact.service";
 
 const schema = z.object({
   name: z.string().min(2, "Too short"),

@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { Zap, Sparkles, Trophy, ChevronRight } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
+import { ShineBorder } from "@/src/components/ui/ShineBorder";
 import Link from "next/link";
 
 export default function HeroAnimations() {
@@ -13,18 +14,15 @@ export default function HeroAnimations() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="mb-8"
+        className="mb-8 "
       >
         <div className="relative inline-flex">
           {/* Shimmer border */}
-          <div 
-            className="absolute -inset-px rounded-full animate-shimmer"
-            style={{
-              background: `linear-gradient(90deg, hsl(0.9 0.2 180) 0%, hsl(0.4 0.15 300) 50%, hsl(0.9 0.2 180) 100%)`,
-              backgroundSize: "200% 100%"
-            }}
-          />
+         
+
           <span className="relative inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-background text-sm font-medium text-muted-foreground">
+                     <ShineBorder className="rounded-full" shineColor={["#A07CFE", "#FE8FB5", "#FFBE7B"]} />
+
             <Sparkles className="w-4 h-4 text-accent" />
             Now in Beta — Free Access
           </span>

@@ -1,5 +1,5 @@
 import { FeaturesCard, SectionHeader } from "@/src/app/(commonLayout)/_components";
-import { FeatureItem } from "@/src/app/(commonLayout)/_components/FeaturesCard";
+import { FeatureItem } from "@/src/app/(commonLayout)/_components/features/FeaturesCard";
 
 const features:FeatureItem[] = [
   {

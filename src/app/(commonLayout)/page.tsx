@@ -1,9 +1,7 @@
 import { Metadata } from "next";
 import dynamic from "next/dynamic";
 
-// Layout / Shared Components
-import Navbar from "@/src/components/shared/Navbar";
-import Footer from "@/src/components/shared/Footer";
+
 
 // Landing Sections
 import HeroSection from "@/src/components/modules/landing/HeroSection";
@@ -14,7 +12,7 @@ import GoldenChanceSection from "@/src/components/modules/landing/GoldenChanceSe
 
 // Lazy-loaded Server Component
 const GeneticProgressSection = dynamic(
-  () => import("./_components/GeneticProgressSection")
+  () => import("./_components/dna/GeneticProgressSection")
 );
 
 export const metadata: Metadata = {
@@ -60,7 +58,7 @@ export const metadata: Metadata = {
 const Page = () => {
   return (
     <>
-      <Navbar />
+ 
 
       {/* Hero / First Impression */}
       <HeroSection />
@@ -80,8 +78,7 @@ const Page = () => {
       {/* Golden Chance / CTA */}
       <GoldenChanceSection />
 
-      {/* Footer */}
-      <Footer />
+   
     </>
   );
 };

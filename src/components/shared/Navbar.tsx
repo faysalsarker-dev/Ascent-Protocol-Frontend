@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/src/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/src/components/ui/sheet";
 import { Menu, X } from "lucide-react";
@@ -13,118 +14,131 @@ const navLinks = [
   { title: "Chat with AI", href: "/chat" },
 ];
 
-const Navbar = () => {
+export default function Navbar() {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [visible, setVisible] = useState(true);
+  const [lastY, setLastY] = useState(0);
+  const [open, setOpen] = useState(false);
 
-  // Scroll hide/show animation
+  // Hide on scroll down
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        setVisible(false); // scroll down -> hide
-      } else {
-        setVisible(true); // scroll up -> show
-      }
-      setLastScrollY(currentScrollY);
+      const y = window.scrollY;
+      setVisible(!(y > lastY && y > 50));
+      setLastY(y);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
+  }, [lastY]);
 
   return (
-    <header
-      className={`fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border/30 transition-transform duration-300 ${
-        visible ? "translate-y-0" : "-translate-y-full"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-        {/* Logo */}
-        <Link href="/" className="font-bold text-2xl md:text-3xl text-primary tracking-tight">
-          Ascent <span className="text-accent">Protocol</span>
-        </Link>
-
-        {/* Desktop Links */}
-        <nav className="hidden md:flex items-center gap-6">
-          {navLinks.map((link) => (
+    <AnimatePresence>
+      {visible && (
+        <motion.header
+          initial={{ y: -80, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -80, opacity: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="fixed top-0 left-0 w-full z-[99] bg-background/70 backdrop-blur-xl border-b border-border/30"
+        >
+          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            
+            {/* Logo */}
             <Link
-              key={link.href}
-              href={link.href}
-              className={`relative text-foreground hover:text-primary transition ${
-                pathname === link.href
-                  ? "after:absolute after:-bottom-1 after:left-0 after:w-full after:h-[2px] after:bg-accent"
-                  : ""
-              }`}
+              href="/"
+              className="text-2xl md:text-3xl font-extrabold tracking-tight text-primary"
             >
-              {link.title}
+              Ascent <span className="text-accent">Protocol</span>
             </Link>
-          ))}
 
-          <Link href="/login">
-            <Button size="sm" variant="outline">
-              Login
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button size="sm">Register</Button>
-          </Link>
-        </nav>
-
-        {/* Mobile Menu */}
-        <div className="md:hidden">
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <button>
-                <Menu className="w-6 h-6 text-foreground" />
-              </button>
-            </SheetTrigger>
-
-            <SheetContent  size="sm" className="p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="font-bold text-xl text-primary">
-                  Ascent <span className="text-accent">Protocol</span>
-                </h2>
-                <button onClick={() => setMobileOpen(false)}>
-                  <X className="w-6 h-6 text-foreground" />
-                </button>
-              </div>
-
-              <div className="flex flex-col gap-4">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={`py-2 px-4 rounded-md transition ${
+            {/* Desktop Nav */}
+            <nav className="hidden md:flex items-center gap-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="relative group text-sm font-medium"
+                >
+                  <span
+                    className={`${
                       pathname === link.href
-                        ? "bg-primary/10 text-primary font-semibold"
-                        : "text-foreground hover:bg-primary/20"
+                        ? "text-primary"
+                        : "text-foreground/80 group-hover:text-primary transition"
                     }`}
                   >
                     {link.title}
-                  </Link>
-                ))}
+                  </span>
 
-                <Link href="/login" onClick={() => setMobileOpen(false)}>
-                  <Button size="sm" variant="outline" className="w-full">
-                    Login
-                  </Button>
+                  {/* Hover + Active underline animation */}
+                  <motion.span
+                    layoutId="navbar-underline"
+                    className={`absolute left-0 -bottom-1 h-[2px] bg-accent ${
+                      pathname === link.href ? "w-full" : "w-0 group-hover:w-full transition-all duration-300"
+                    }`}
+                  />
                 </Link>
-                <Link href="/register" onClick={() => setMobileOpen(false)}>
-                  <Button size="sm" className="w-full">
-                    Register
-                  </Button>
-                </Link>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
-      </div>
-    </header>
+              ))}
+
+              {/* Auth Buttons */}
+              <Link href="/login">
+                <Button size="sm" variant="outline">Login</Button>
+              </Link>
+              <Link href="/register">
+                <Button size="sm">Register</Button>
+              </Link>
+            </nav>
+
+            {/* Mobile Nav */}
+            <div className="md:hidden">
+              <Sheet open={open} onOpenChange={setOpen}>
+                <SheetTrigger>
+                  <Menu className="w-6 h-6" />
+                </SheetTrigger>
+
+                <SheetContent side="right" className="p-6">
+                  <div className="flex justify-between items-center">
+                    <h2 className="font-bold text-xl text-primary">
+                      Ascent <span className="text-accent">Protocol</span>
+                    </h2>
+                    <X className="w-6 h-6" onClick={() => setOpen(false)} />
+                  </div>
+
+                  <div className="mt-8 flex flex-col gap-4">
+                    {navLinks.map((link) => (
+                      <motion.div
+                        key={link.href}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <Link
+                          href={link.href}
+                          onClick={() => setOpen(false)}
+                          className={`block py-2 px-3 rounded-md ${
+                            pathname === link.href
+                              ? "bg-primary/10 text-primary font-semibold"
+                              : "text-foreground hover:bg-primary/15"
+                          }`}
+                        >
+                          {link.title}
+                        </Link>
+                      </motion.div>
+                    ))}
+
+                    <Link href="/login" onClick={() => setOpen(false)}>
+                      <Button className="w-full" variant="outline">Login</Button>
+                    </Link>
+                    <Link href="/register" onClick={() => setOpen(false)}>
+                      <Button className="w-full">Register</Button>
+                    </Link>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
+        </motion.header>
+      )}
+    </AnimatePresence>
   );
-};
-
-export default Navbar;
+}

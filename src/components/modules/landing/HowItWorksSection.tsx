@@ -1,7 +1,7 @@
 import DecorativeElements from "@/src/components/ui/Decorative-Elements";
 import { SectionHeader } from "@/src/app/(commonLayout)/_components";
 import {HowItWorkCard} from "@/src/app/(commonLayout)/_components";
-import { DeskTopLine } from "@/src/app/(commonLayout)/_components/HowItWorkCard";
+import { DeskTopLine } from "@/src/app/(commonLayout)/_components/HowItWork/HowItWorkCard";
 
 
 export type HowItWorkItem = {

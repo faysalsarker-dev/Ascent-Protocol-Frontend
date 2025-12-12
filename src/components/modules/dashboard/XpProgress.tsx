@@ -7,29 +7,19 @@ import type { DashboardStats, WidgetState } from "./types";
 import { ErrorCard } from "./ErrorCard";
 
 interface XpProgressProps {
-  data: WidgetState<DashboardStats>;
+  data: DashboardStats | undefined;
   onRetry: () => void;
 }
 
 const XP_PER_LEVEL = 1000;
 
 export function XpProgress({ data, onRetry }: XpProgressProps) {
-  if (data.status === 'loading') {
-    return (
-      <Card className="card-glow">
-        <CardContent className="p-4">
-          <Skeleton className="h-4 w-32 mb-3" />
-          <Skeleton className="h-3 w-full" />
-        </CardContent>
-      </Card>
-    );
-  }
 
-  if (data.status === 'error') {
-    return <ErrorCard message={data.message} onRetry={onRetry} />;
-  }
+if (!data) {
+  return <ErrorCard message="No XP_PER_LEVEL data available" onRetry={onRetry} />;
+}
 
-  const { totalXpEarned } = data.data;
+  const { totalXpEarned } = data ;
   const currentLevel = Math.floor(totalXpEarned / XP_PER_LEVEL) + 1;
   const xpInCurrentLevel = totalXpEarned % XP_PER_LEVEL;
   const progressPercent = (xpInCurrentLevel / XP_PER_LEVEL) * 100;
@@ -60,7 +50,6 @@ export function XpProgress({ data, onRetry }: XpProgressProps) {
             <Progress 
               value={progressPercent} 
               className="h-3 bg-muted"
-              indicatorClassName="bg-gradient-to-r from-accent to-yellow-400"
             />
             <motion.div
               className="absolute inset-0 h-3 rounded-full overflow-hidden pointer-events-none"

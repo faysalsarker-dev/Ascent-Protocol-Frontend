@@ -34,13 +34,11 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
 
-
   --color-success-foreground: var(--success-foreground);
   --color-success: var(--success);
 
   --color-warning-foreground: var(--warning-foreground);
   --color-warning: var(--warning);
-
 
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
@@ -78,7 +76,6 @@
 
   /* DESTRUCTIVE/DANGER (Red - #EC3434, used for errors/destructive actions) */
   --destructive: oklch(0.6 0.2 30);
-  
 
 --success: oklch(0.67 0.15 152);
 --success-foreground: oklch(0.11 0.02 305);
@@ -115,8 +112,6 @@
   --chart-5: oklch(0.556 0 0); /* Muted-Darker */
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -126,9 +121,7 @@
   }
 }
 
-
 /* ========== New Code =========== */
-
 
 @layer components {
   /* Main Background Container (Dark Gradient) */
@@ -257,7 +250,6 @@
     animation: shimmer 2s infinite;
   }
 }
-
 
 @layer utilities {
   .animate-float {
@@ -418,3 +410,14 @@
       background-position: 0% 0%;
     }
   }
+
+ .dark {
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}

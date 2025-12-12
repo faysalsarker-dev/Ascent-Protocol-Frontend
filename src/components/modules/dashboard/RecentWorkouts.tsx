@@ -8,7 +8,7 @@ import type { RecentWorkout, WidgetState } from "./types";
 import { ErrorCard } from "./ErrorCard";
 
 interface RecentWorkoutsProps {
-  data: WidgetState<RecentWorkout[]>;
+  data:RecentWorkout[] | undefined;
   onRetry: () => void;
 }
 
@@ -34,31 +34,9 @@ const item = {
 };
 
 export function RecentWorkouts({ data, onRetry }: RecentWorkoutsProps) {
-  if (data.status === 'loading') {
-    return (
-      <Card className="card-glow">
-        <CardHeader className="pb-3">
-          <Skeleton className="h-5 w-32" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-              <Skeleton className="h-10 w-10 rounded-lg" />
-              <div className="flex-1">
-                <Skeleton className="h-4 w-24 mb-1" />
-                <Skeleton className="h-3 w-16" />
-              </div>
-              <Skeleton className="h-6 w-16 rounded-full" />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
 
-  if (data.status === 'error') {
-    return <ErrorCard message={data.message} onRetry={onRetry} />;
-  }
+
+
 
   return (
     <motion.div
@@ -80,8 +58,8 @@ export function RecentWorkouts({ data, onRetry }: RecentWorkoutsProps) {
             initial="hidden"
             animate="show"
           >
-            {data.data.slice(0, 5).map((workout) => {
-              const mood = moodConfig[workout.mood];
+            {data?.slice(0, 5).map((workout) => {
+const mood = moodConfig[workout.mood as keyof typeof moodConfig] ?? moodConfig.AVERAGE;
               const MoodIcon = mood.icon;
               
               return (

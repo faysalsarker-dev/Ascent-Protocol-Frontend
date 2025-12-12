@@ -32,45 +32,49 @@ export interface VolumeChartData {
 }
 
 export interface MuscleDistributionItem {
-  muscleGroup: string;
+  muscleGroup: string | null;
   totalVolume: number;
   totalSets: number;
   workoutCount: number;
   percentage: number;
   avgVolumePerWorkout: number;
-  lastWorkedOut: string;
+  lastWorkedOut: string | null;
   strengthScore: number;
 }
 
 export interface MuscleDistributionData {
   data: MuscleDistributionItem[];
   summary: {
-    strongestMuscle: { muscleGroup: string; strengthScore: number };
-    weakestMuscle: { muscleGroup: string; strengthScore: number };
-    totalVolume: number;
-    balanceScore: number;
+strongestMuscle: { muscleGroup: string | null; strengthScore: number | null } | null;
+weakestMuscle: { muscleGroup: string | null; strengthScore: number | null } | null;
+
+    totalVolume: number | null;
+    balanceScore: number | null;
   };
 }
+
+export type WorkoutStatus = "COMPLETED" | "SKIPPED" | "IN_PROGRESS" | "PLANNED";
+
 
 export interface RecentWorkout {
   id: string;
   sessionDate: string;
   dayName: string;
-  status: 'COMPLETED' | 'SKIPPED' | 'IN_PROGRESS';
-  durationMin: number;
-  totalSets: number;
-  totalVolume: number;
-  xpEarned: number;
-  mood: 'EXCELLENT' | 'GOOD' | 'AVERAGE' | 'TIRED' | 'EXHAUSTED';
+  status: WorkoutStatus;
+  durationMin: number | null;
+  totalSets: number | null;
+  totalVolume: number | null;
+  xpEarned: number | null;
+  mood: 'EXCELLENT' | 'GOOD' | 'AVERAGE' | 'TIRED' | 'EXHAUSTED' | "POOR" | null;
 }
 
 export interface PersonalRecord {
   exerciseName: string;
   muscleGroup: string;
-  maxWeight: number;
-  maxReps: number;
-  achievedAt: string;
-  totalSets: number;
+  maxWeight: number | null;
+  maxReps: number | null;
+  achievedAt: string | null;
+  totalSets: number | null;
 }
 
 // Widget State Types

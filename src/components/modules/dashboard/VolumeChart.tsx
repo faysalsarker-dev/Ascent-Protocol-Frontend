@@ -7,7 +7,7 @@ import type { VolumeChartData, WidgetState } from "./types";
 import { ErrorCard } from "./ErrorCard";
 
 interface VolumeChartProps {
-  data: WidgetState<VolumeChartData>;
+  data: VolumeChartData | undefined;
   onRetry: () => void;
 }
 
@@ -18,24 +18,13 @@ const trendConfig = {
 };
 
 export function VolumeChart({ data, onRetry }: VolumeChartProps) {
-  if (data.status === 'loading') {
-    return (
-      <Card className="card-glow">
-        <CardHeader className="pb-2">
-          <Skeleton className="h-5 w-40" />
-        </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[200px] w-full" />
-        </CardContent>
-      </Card>
-    );
-  }
 
-  if (data.status === 'error') {
-    return <ErrorCard message={data.message} onRetry={onRetry} />;
-  }
 
-  const { data: chartData, summary } = data.data;
+if (!data) {
+  return <ErrorCard message="No volume chart data available" onRetry={onRetry} />;
+}
+
+  const { data: chartData, summary } = data;
   const trend = trendConfig[summary.trend];
   const TrendIcon = trend.icon;
 

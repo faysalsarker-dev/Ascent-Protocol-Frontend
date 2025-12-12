@@ -8,7 +8,7 @@ import type { PersonalRecord, WidgetState } from "./types";
 import { ErrorCard } from "./ErrorCard";
 
 interface PersonalRecordsProps {
-  data: WidgetState<PersonalRecord[]>;
+  data:PersonalRecord[] | undefined;
   onRetry: () => void;
 }
 
@@ -26,31 +26,7 @@ const item = {
 };
 
 export function PersonalRecords({ data, onRetry }: PersonalRecordsProps) {
-  if (data.status === 'loading') {
-    return (
-      <Card className="card-glow">
-        <CardHeader className="pb-3">
-          <Skeleton className="h-5 w-32" />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-              <Skeleton className="h-10 w-10 rounded-lg" />
-              <div className="flex-1">
-                <Skeleton className="h-4 w-28 mb-1" />
-                <Skeleton className="h-3 w-20" />
-              </div>
-              <Skeleton className="h-8 w-20" />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (data.status === 'error') {
-    return <ErrorCard message={data.message} onRetry={onRetry} />;
-  }
+ 
 
   return (
     <motion.div
@@ -72,35 +48,38 @@ export function PersonalRecords({ data, onRetry }: PersonalRecordsProps) {
             initial="hidden"
             animate="show"
           >
-            {data.data.map((record, index) => (
+            {data?.map((record, index) => (
               <motion.div
-                key={`${record.exerciseName}-${index}`}
+                key={`${record?.exerciseName}-${index}`}
                 variants={item}
                 className="flex items-center gap-3 p-3 rounded-lg bg-accent/5 border border-accent/20 hover:bg-accent/10 transition-colors"
               >
-                <div className="p-2 rounded-lg bg-accent/20">
+                <div className="p-2 rounded-lg bg-secondary/80">
                   <Dumbbell className="h-5 w-5 text-accent" />
                 </div>
                 
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{record.exerciseName}</p>
+                  <p className="text-sm font-medium truncate">{record?.exerciseName}</p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Badge variant="outline" className="text-xs capitalize bg-muted/50">
-                      {record.muscleGroup.toLowerCase()}
+                      {record?.muscleGroup?.toLowerCase()}
                     </Badge>
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
-                      {format(parseISO(record.achievedAt), 'MMM d')}
+                     {record?.achievedAt
+  ? format(parseISO(record.achievedAt), 'MMM d')
+  : 'N/A'}
+
                     </span>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <p className="text-lg font-display font-bold text-accent">
-                    {record.maxWeight}kg
+                  <p className="text-lg font-display font-bold text-primary">
+                    {record?.maxWeight}kg
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    × {record.maxReps} reps
+                    × {record?.maxReps} reps
                   </p>
                 </div>
               </motion.div>

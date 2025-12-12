@@ -6,7 +6,7 @@ import type { DashboardStats, WidgetState } from "./types";
 import { ErrorCard } from "./ErrorCard";
 
 interface StreakCardProps {
-  data: WidgetState<DashboardStats>;
+  data: DashboardStats | undefined ;
   isLoading:boolean;
   onRetry: () => void;
 }
@@ -25,11 +25,15 @@ export function StreakCard({ data,isLoading, onRetry }: StreakCardProps) {
     );
   }
 
-  if (data.status === 'error') {
-    return <ErrorCard message={data.message} onRetry={onRetry} />;
-  }
+ 
 
-  const { currentStreak, longestStreak } = data.data;
+
+
+
+  const currentStreak = data?.currentStreak ?? 0;
+const longestStreak = data?.longestStreak ?? 0;
+
+
   const isOnFire = currentStreak >= 3;
 
   return (

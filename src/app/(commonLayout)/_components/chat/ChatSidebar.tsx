@@ -72,7 +72,7 @@ const dates = data?.data || []
           ) : dates.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-4">No chat history</p>
           ) : (
-            dates?.map((date) => (
+            dates?.map((date:string) => (
               <button
                 key={date}
                 onClick={() => onSelectDate(date)}

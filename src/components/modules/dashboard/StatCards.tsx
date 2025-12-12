@@ -11,7 +11,7 @@ import type { DashboardStats, WidgetState } from "./types";
 import { ErrorCard } from "./ErrorCard";
 
 interface StatCardsProps {
-  data: WidgetState<DashboardStats>;
+  data: DashboardStats | undefined;
   isLoading:boolean;
   onRetry: () => void;
 }
@@ -44,9 +44,8 @@ const item = {
   show: { opacity: 1, y: 0 }
 };
 
-export function StatCards({ data, isLoading,isError, onRetry }: StatCardsProps) {
+export function StatCards({ data, isLoading, onRetry }: StatCardsProps) {
 
-  console.log(data,'data')
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-3">
@@ -62,9 +61,7 @@ export function StatCards({ data, isLoading,isError, onRetry }: StatCardsProps) 
     );
   }
 
-  if (isError) {
-    return <ErrorCard message={data.message} onRetry={onRetry} />;
-  }
+
 
   return (
     <motion.div 
@@ -86,9 +83,10 @@ export function StatCards({ data, isLoading,isError, onRetry }: StatCardsProps) 
                 <span className="text-xs text-muted-foreground uppercase tracking-wide">{label}</span>
               </div>
               <div className="flex items-baseline gap-1">
-                <span className="stat-value text-foreground">
-                  {format(data.data[key])}
-                </span>
+          <span className="stat-value text-foreground">
+  {data ? format(data[key]) : '0'}
+</span>
+
                 {suffix && (
                   <span className="text-sm text-muted-foreground">{suffix}</span>
                 )}

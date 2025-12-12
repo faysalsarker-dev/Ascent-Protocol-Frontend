@@ -8,7 +8,6 @@ const ContactPage = () => {
 
   return (
     <>
-<Navbar/>
 
     <main className="min-h-screen bg-background overflow-x-hidden">
       <section className="pt-32 pb-20 relative">
@@ -36,7 +35,6 @@ const ContactPage = () => {
         </div>
       </section>
     </main>
-    <Footer/>
     </>
   );
 };

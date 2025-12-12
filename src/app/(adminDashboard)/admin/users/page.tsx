@@ -1,8 +1,9 @@
 
+import { UsersPage } from './../_components/UsersPage';
 const page = () => {
     return (
         <div>
-            
+            <UsersPage/>
         </div>
     );
 };

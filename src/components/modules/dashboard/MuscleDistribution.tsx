@@ -8,7 +8,7 @@ import type { MuscleDistributionData, WidgetState } from "./types";
 import { ErrorCard } from "./ErrorCard";
 
 interface MuscleDistributionProps {
-  data: WidgetState<MuscleDistributionData>;
+  data: MuscleDistributionData | undefined;
   onRetry: () => void;
 }
 
@@ -35,31 +35,13 @@ const item = {
 };
 
 export function MuscleDistribution({ data, onRetry }: MuscleDistributionProps) {
-  if (data.status === 'loading') {
-    return (
-      <Card className="card-glow">
-        <CardHeader className="pb-2">
-          <Skeleton className="h-5 w-40" />
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <Skeleton className="h-[140px] w-[140px] rounded-full" />
-            <div className="flex-1 space-y-3">
-              {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-6 w-full" />
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+ 
+if (!data) {
+  return <ErrorCard message="No muscle distribution data available" onRetry={onRetry} />;
+}
 
-  if (data.status === 'error') {
-    return <ErrorCard message={data.message} onRetry={onRetry} />;
-  }
 
-  const { data: muscleData, summary } = data.data;
+  const { data: muscleData, summary } = data;
 
   return (
     <motion.div
@@ -75,7 +57,7 @@ export function MuscleDistribution({ data, onRetry }: MuscleDistributionProps) {
           </CardTitle>
           <div className="flex items-center gap-2 mt-1">
             <span className="text-xs text-muted-foreground">Balance Score:</span>
-            <span className="text-sm font-display font-bold text-primary">{summary.balanceScore}%</span>
+            <span className="text-sm font-display font-bold text-primary">{summary?.balanceScore}%</span>
           </div>
         </CardHeader>
         <CardContent>
@@ -105,7 +87,7 @@ export function MuscleDistribution({ data, onRetry }: MuscleDistributionProps) {
                       borderRadius: '8px',
                       fontSize: '12px',
                     }}
-                    formatter={(value: number, name: string) => [`${value.toFixed(1)}%`, name]}
+                    formatter={(value: number, name: string) => [`${value?.toFixed(1)}%`, name]}
                   />
                 </PieChart>
               </ResponsiveContainer>
@@ -118,7 +100,7 @@ export function MuscleDistribution({ data, onRetry }: MuscleDistributionProps) {
               animate="show"
             >
               {muscleData.slice(0, 4).map((muscle, index) => (
-                <motion.div key={muscle.muscleGroup} variants={item} className="space-y-1">
+                <motion.div key={muscle?.muscleGroup} variants={item} className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2">
                       <div 
@@ -126,14 +108,14 @@ export function MuscleDistribution({ data, onRetry }: MuscleDistributionProps) {
                         style={{ backgroundColor: COLORS[index % COLORS.length] }}
                       />
                       <span className="capitalize text-muted-foreground">
-                        {muscle.muscleGroup.toLowerCase()}
+                        {muscle?.muscleGroup?.toLowerCase()}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{muscle.strengthScore}</span>
-                      {muscle.muscleGroup === summary.strongestMuscle.muscleGroup ? (
+                      <span className="font-medium">{muscle?.strengthScore}</span>
+                      {muscle?.muscleGroup === summary?.strongestMuscle?.muscleGroup ? (
                         <TrendingUp className="h-3 w-3 text-success" />
-                      ) : muscle.muscleGroup === summary.weakestMuscle.muscleGroup ? (
+                      ) : muscle?.muscleGroup === summary?.weakestMuscle?.muscleGroup ? (
                         <TrendingDown className="h-3 w-3 text-warning" />
                       ) : null}
                     </div>

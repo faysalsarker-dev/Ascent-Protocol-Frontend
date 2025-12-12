@@ -47,8 +47,8 @@ export function useGenerateWorkoutPlan() {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: { goal: string; days: number }) =>
-      generateWorkoutPlan(payload),
+    mutationFn: () =>
+      generateWorkoutPlan(),
 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["chat-history"] });

@@ -10,13 +10,13 @@ import {
   completeWorkoutSession,
   skipWorkoutSession,
   deleteWorkoutSession,
-  getLastWorkoutSession
+  getLastWorkoutSession,
+  UpdateWorkoutSessionPayload
 } from "../services/workout/workout.service";
 
 import type {
   WorkoutSession,
   GetSessionsParams,
-  UpdateWorkoutSessionPayload,
   ApiResponse,
 } from "@/src/types/workout-session";
 
@@ -27,9 +27,9 @@ import type {
 // -----------------------
 
 export function useWorkoutSessions(params?: GetSessionsParams) {
-  return useQuery<ApiResponse<WorkoutSession[]>>({
+  return useQuery({
     queryKey: ["workout-sessions", params],
-    queryFn: () => getAllWorkoutSessions(params),
+    queryFn: () => getAllWorkoutSessions(),
   });
 }
 
@@ -73,11 +73,14 @@ export function useCreateWorkoutSession() {
   });
 }
 
+
+
+
 export function useUpdateWorkoutSession(sessionId: string) {
   const qc = useQueryClient();
 
-  return useMutation<ApiResponse<WorkoutSession>, Error, UpdateWorkoutSessionPayload>({
-    mutationFn: (payload) => updateWorkoutSession(sessionId, payload),
+  return useMutation({
+    mutationFn: (payload:UpdateWorkoutSessionPayload) => updateWorkoutSession(sessionId, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["workout-sessions"] });
       qc.invalidateQueries({ queryKey: ["workout-session", sessionId] });

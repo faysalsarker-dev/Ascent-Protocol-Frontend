@@ -37,11 +37,21 @@ export default async function middleware(request: NextRequest) {
   }
 
   // Protect admin routes
+  // if (pathname.startsWith('/admin')) {
+  //   if (!user || user.role !== 'ADMIN') {
+  //     return NextResponse.redirect(new URL('/login', request.url));
+  //   }
+  // }
   if (pathname.startsWith('/admin')) {
-    if (!user || user.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
+  if (!user || typeof user === 'string' || !('role' in user) || user.role !== 'ADMIN') {
+  return NextResponse.redirect(new URL('/login', request.url));
+}
   }
+
+
+
+
+
 
   return NextResponse.next();
 }

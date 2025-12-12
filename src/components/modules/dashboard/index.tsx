@@ -2,7 +2,6 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Swords } from "lucide-react";
-import { useFakeDashboardData } from "./useFakeDashboardData";
 import { StatCards } from "./StatCards";
 import { StreakCard } from "./StreakCard";
 import { XpProgress } from "./XpProgress";
@@ -11,21 +10,44 @@ import { VolumeChart } from "./VolumeChart";
 import { MuscleDistribution } from "./MuscleDistribution";
 import { PersonalRecords } from "./PersonalRecords";
 import { useDashboardStats ,useVolumeChart ,useMuscleDistribution, useDashboardOverview} from "@/src/hooks/useDashboard";
+import { Card, CardContent } from "@/src/components/ui/card";
+import { Skeleton } from "@/src/components/ui/skeleton";
 
 
 export function DashboardPage() {
-  const [, setRetryCount] = useState(0);
-  const data = useFakeDashboardData(false); 
 
-  const {data:stats,isLoading ,isError}=useDashboardStats()
-  const {data:volumeData}=useVolumeChart()
-  const {data:muscleDistribution}=useMuscleDistribution()
-  const {data:dashboard}=useDashboardOverview()
+
+
+  const {data:dashboard,isLoading , isError,refetch  }=useDashboardOverview()
+  const data = dashboard?.data 
 console.log(dashboard)
 
   const handleRetry = useCallback(() => {
-    setRetryCount((c) => c + 1);
+refetch()
   }, []);
+
+
+
+
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-2 gap-3">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="card-glow">
+            <CardContent className="p-4">
+              <Skeleton className="h-4 w-16 mb-2" />
+              <Skeleton className="h-8 w-24" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+
+
+
 
   return (
     <div className="min-h-screen bg-background px-4">
@@ -56,9 +78,9 @@ console.log(dashboard)
       {/* Main Content */}
       <main className="container py-4 space-y-4">
         {/* Stat Cards Grid */}
-       {/* <StatCards data={stats} isLoading={isLoading} isError={isError} onRetry={handleRetry} />
+     <StatCards data={data?.stats} isLoading={isLoading}  onRetry={handleRetry} />
 
-        <StreakCard data={stats} isLoading={isLoading} isError={isError} onRetry={handleRetry} />  */}
+        <StreakCard data={data?.stats} isLoading={isLoading}  onRetry={handleRetry} />  
 
 
 
@@ -66,19 +88,19 @@ console.log(dashboard)
 
 
         {/* XP Progress */}
-        <XpProgress data={data.stats} onRetry={handleRetry} />
+        <XpProgress data={data?.stats} onRetry={handleRetry} />
 
         {/* Recent Workouts */}
-        <RecentWorkouts data={data.recentWorkouts} onRetry={handleRetry} />
+        <RecentWorkouts data={data?.recentWorkouts} onRetry={handleRetry} />
 
         {/* Volume Chart */}
-        {/* <VolumeChart data={volumeData} onRetry={handleRetry} /> */}
+        <VolumeChart data={data?.volumeChart} onRetry={handleRetry} />
 
         {/* Muscle Distribution */}
-        {/* <MuscleDistribution data={muscleDistribution} onRetry={handleRetry} /> */}
+        <MuscleDistribution data={data?.muscleDistribution} onRetry={handleRetry} />
 
         {/* Personal Records */}
-        <PersonalRecords data={data.personalRecords} onRetry={handleRetry} />
+        <PersonalRecords data={data?.personalRecords} onRetry={handleRetry} />
 
         {/* Bottom spacing for mobile */}
         <div className="h-8" />

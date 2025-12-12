@@ -230,7 +230,7 @@ export interface CreateExerciseSetPayload {
 
 export interface BulkSetPayload {
   exerciseName: string;
-  muscleGroup: MuscleGroup;
+  muscleGroup: MuscleGroup | string;
   sets: Array<{
     setNumber: number;
     reps: number;
@@ -962,3 +962,4 @@ export async function getPersonalRecords(){
     throw error;
   }
 }
+

@@ -1,6 +1,6 @@
 # AURA Fitness Frontend
 
-Next.js + TypeScript frontend for the AURA Fitness workout planning and tracking API.  
+Next.js + TypeScript frontend for the Ascent Protocall Fitness workout planning and tracking API.  
 It covers authentication, workout plan management, day/exercise planning, active workout sessions, and exercise history.
 
 ---

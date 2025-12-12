@@ -44,7 +44,7 @@ export const ScanlineOverlay = () => (
       }}
     />
     <motion.div
-      className="absolute left-0 right-0 h-12 bg-gradient-to-b from-transparent via-primary/10 to-transparent"
+      className="absolute left-0 right-0 h-12 bg-linear-to-b from-transparent via-primary/10 to-transparent"
       initial={{ top: "-48px" }}
       animate={{ top: "100%" }}
       transition={{ duration: 5, repeat: Infinity, ease: "linear" }}

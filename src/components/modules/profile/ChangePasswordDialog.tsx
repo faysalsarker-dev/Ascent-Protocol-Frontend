@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,13 +7,12 @@ import { Shield, X, Check, Eye, EyeOff, Lock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
 } from "@/src/components/ui/dialog";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { toast } from "@/src/hooks/use-toast";
 import { usePassWordChange } from "@/src/hooks/useAuth";
+import { toast } from "sonner";
 
 // Validation schema
 const passwordSchema = z.object({
@@ -37,6 +36,85 @@ interface ChangePasswordDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
+
+const getPasswordStrength = (password: string) => {
+  if (!password) return { strength: 0, label: "" };
+
+  let strength = 0;
+  if (password.length >= 8) strength++;
+  if (password.length >= 12) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[a-z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+  const labels = ["", "Weak", "Fair", "Good", "Strong", "Very Strong", "Very Strong"];
+  const colors = ["", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-500", "bg-emerald-500", "bg-emerald-500"];
+
+  // Cap strength at 5 for array access
+  const cappedStrength = Math.min(strength, 6);
+  
+  return { 
+    strength: cappedStrength, 
+    label: labels[cappedStrength],
+    color: colors[cappedStrength]
+  };
+};
+
+
+interface PasswordFieldComponentProps {
+  label: string;
+  name: keyof PasswordFormData;
+  show: boolean;
+  onToggle: () => void;
+  placeholder: string;
+  error?: string;
+  isSubmitting: boolean; // Pass this down as a prop
+  register: ReturnType<typeof useForm<PasswordFormData>>['register']; // Pass the register function
+}
+
+const PasswordField = ({
+  label,
+  name,
+  show,
+  onToggle,
+  placeholder,
+  error,
+  isSubmitting,
+  register
+}: PasswordFieldComponentProps) => (
+  <div className="space-y-2">
+    <Label className="font-mono text-xs text-muted-foreground uppercase tracking-wider">
+      {label}
+    </Label>
+    <div className="relative">
+      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <Input
+        type={show ? "text" : "password"}
+        {...register(name)}
+        placeholder={placeholder}
+        className={`input-system h-12 text-foreground pl-10 pr-10 ${
+          error ? "border-destructive" : ""
+        }`}
+        disabled={isSubmitting}
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+        disabled={isSubmitting}
+      >
+        {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
+    </div>
+    {error && (
+      <p className="text-xs text-destructive font-mono">{error}</p>
+    )}
+  </div>
+);
+
+
+
 export const ChangePasswordDialog = ({
   open,
   onOpenChange,
@@ -50,15 +128,18 @@ export const ChangePasswordDialog = ({
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
     reset,
-    watch,
   } = useForm<PasswordFormData>({
     resolver: zodResolver(passwordSchema),
     mode: "onBlur",
   });
 
-  const newPassword = watch("newPassword");
+  const newPassword = useWatch({
+    control, 
+    name: "newPassword",
+  });
 
   const onSubmit = async (data: PasswordFormData) => {
     const payload = {
@@ -68,20 +149,19 @@ export const ChangePasswordDialog = ({
 
     passwordMutation.mutate(payload, {
       onSuccess: () => {
-        toast({
-          title: "✅ Success",
-          description: "Password updated successfully",
-        });
+        toast.success('Password updated successfully')
+      
         reset();
         onOpenChange(false);
       },
-      onError: (error: any) => {
-        toast({
-          title: "⚠️ Error",
-          description: error?.message || "Failed to update password",
-          variant: "destructive",
-        });
-      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   onError: (error: any) => {
+  const apiErrorMessage = 
+    error.response?.data?.message || 
+    error.message;                   
+
+  toast.error(apiErrorMessage || "An unknown error occurred while changing your password.");
+},
     });
   };
 
@@ -90,73 +170,7 @@ export const ChangePasswordDialog = ({
     onOpenChange(false);
   };
 
-  const PasswordField = ({
-    label,
-    name,
-    show,
-    onToggle,
-    placeholder,
-    error,
-  }: {
-    label: string;
-    name: keyof PasswordFormData;
-    show: boolean;
-    onToggle: () => void;
-    placeholder: string;
-    error?: string;
-  }) => (
-    <div className="space-y-2">
-      <Label className="font-mono text-xs text-muted-foreground uppercase tracking-wider">
-        {label}
-      </Label>
-      <div className="relative">
-        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          type={show ? "text" : "password"}
-          {...register(name)}
-          placeholder={placeholder}
-          className={`input-system h-12 text-foreground pl-10 pr-10 ${
-            error ? "border-destructive" : ""
-          }`}
-          disabled={isSubmitting}
-        />
-        <button
-          type="button"
-          onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-          disabled={isSubmitting}
-        >
-          {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-        </button>
-      </div>
-      {error && (
-        <p className="text-xs text-destructive font-mono">{error}</p>
-      )}
-    </div>
-  );
-
-  // Password strength indicator
-  const getPasswordStrength = (password: string) => {
-    if (!password) return { strength: 0, label: "" };
-    
-    let strength = 0;
-    if (password.length >= 8) strength++;
-    if (password.length >= 12) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[a-z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-    const labels = ["", "Weak", "Fair", "Good", "Strong", "Very Strong"];
-    const colors = ["", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-500", "bg-emerald-500"];
-    
-    return { 
-      strength, 
-      label: labels[Math.min(strength, 5)],
-      color: colors[Math.min(strength, 5)]
-    };
-  };
-
+  // Now the helper function is called here, but defined outside
   const passwordStrength = getPasswordStrength(newPassword || "");
 
   return (
@@ -187,6 +201,7 @@ export const ChangePasswordDialog = ({
                   </div>
                 </div>
 
+                {/* PasswordField uses register and isSubmitting from the form hook */}
                 <PasswordField
                   label="Current Password"
                   name="currentPassword"
@@ -194,6 +209,8 @@ export const ChangePasswordDialog = ({
                   onToggle={() => setShowCurrent(!showCurrent)}
                   placeholder="Enter current..."
                   error={errors.currentPassword?.message}
+                  isSubmitting={isSubmitting}
+                  register={register}
                 />
 
                 <PasswordField
@@ -203,28 +220,38 @@ export const ChangePasswordDialog = ({
                   onToggle={() => setShowNew(!showNew)}
                   placeholder="Enter new..."
                   error={errors.newPassword?.message}
+                  isSubmitting={isSubmitting}
+                  register={register}
                 />
 
                 {/* Password Strength Indicator */}
-                {newPassword && (
-                  <div className="space-y-2">
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((level) => (
-                        <div
-                          key={level}
-                          className={`h-1 flex-1 rounded-full transition-all ${
-                            level <= passwordStrength.strength
-                              ? passwordStrength.color
-                              : "bg-muted"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <p className="text-xs font-mono text-muted-foreground">
-                      Strength: {passwordStrength.label}
-                    </p>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {newPassword && (
+                    <motion.div 
+                      className="space-y-2"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((level) => (
+                          <div
+                            key={level}
+                            className={`h-1 flex-1 rounded-full transition-all ${
+                              level <= passwordStrength.strength
+                                ? passwordStrength.color
+                                : "bg-muted"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-xs font-mono text-muted-foreground">
+                        Strength: {passwordStrength.label}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 <PasswordField
                   label="Confirm Password"
@@ -233,6 +260,8 @@ export const ChangePasswordDialog = ({
                   onToggle={() => setShowConfirm(!showConfirm)}
                   placeholder="Confirm new..."
                   error={errors.confirmPassword?.message}
+                  isSubmitting={isSubmitting}
+                  register={register}
                 />
 
                 <div className="flex gap-3 pt-2">

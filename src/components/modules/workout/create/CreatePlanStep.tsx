@@ -1,4 +1,4 @@
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +13,7 @@ import {
   CornerBracket, 
   HexagonIcon 
 } from "@/src/components/modules/today-task/GamifiedEffects";
+import { useCreateWorkoutPlan } from "@/src/hooks/useWorkoutPlan";
 
 const planSchema = z.object({
   name: z
@@ -29,19 +30,22 @@ type PlanFormData = z.infer<typeof planSchema>;
 
 const CreatePlanStep = () => {
   const { setPlan, goToNextStep } = useWorkoutBuilder();
-
+const {mutateAsync , isPending}=useCreateWorkoutPlan()
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<PlanFormData>({
     resolver: zodResolver(planSchema),
   });
 
   const handleFormSubmit = async (data: PlanFormData) => {
     // Simulate API call - replace with actual mutation
-    await new Promise(resolve => setTimeout(resolve, 800));
-    const planData = { name: data.name, description: data.description, id: `plan-${Date.now()}` };
+const payload = {
+  name: data.name, description: data.description
+}
+    const result = await mutateAsync(payload)
+    const planData = { name: data.name, description: data.description, id: result?.data?.id };
     setPlan(planData);
     goToNextStep();
   };
@@ -159,21 +163,21 @@ const CreatePlanStep = () => {
           >
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isPending}
               className="w-full h-12 font-system text-sm uppercase tracking-widest bg-primary hover:bg-primary/90 text-primary-foreground relative overflow-hidden"
             >
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -skew-x-12"
                 initial={{ x: "-100%" }}
-                animate={{ x: isSubmitting ? "100%" : "-100%" }}
+                animate={{ x: isPending ? "100%" : "-100%" }}
                 transition={{ 
                   duration: 1, 
-                  repeat: isSubmitting ? Infinity : 0,
+                  repeat: isPending ? Infinity : 0,
                   ease: "linear"
                 }}
               />
               
-              {isSubmitting ? (
+              {isPending ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   INITIATING...

@@ -2,31 +2,282 @@
 
 import { dataFetch } from "@/src/lib/data-fetch";
 import { revalidateTag } from "next/cache";
-import type {
-  ApiResponse,
-  WorkoutPlan,
-  CreateWorkoutPlanPayload,
-  UpdateWorkoutPlanPayload,
-  WorkoutDay,
-  CreateWorkoutDayPayload,
-  UpdateWorkoutDayPayload,
-  PlannedExercise,
-  CreatePlannedExercisePayload,
-  UpdatePlannedExercisePayload,
-  WorkoutSession,
-  CreateWorkoutSessionPayload,
-  UpdateWorkoutSessionPayload,
-  CompleteSessionPayload,
-  ExerciseSet,
-  CreateExerciseSetPayload,
-  BulkSetPayload,
-  UpdateExerciseSetPayload,
-  ReorderExercisePayload,
-  GetSessionsParams,
-} from "@/src/types/workout";
+
+
+
+
+
+
+
+
+import { WorkoutPlan } from '@/src/types/workout.types';
+// import { BulkSetPayload } from "@/src/types/workout";
+// import { UpdateExerciseSetPayload } from "@/src/types/workout";
+// import { CreateExerciseSetPayload } from "@/src/types/workout";
+// import { CompleteSessionPayload } from "@/src/types/workout";
+// import { UpdateWorkoutSessionPayload } from "@/src/types/workout";
+// import { CreateWorkoutSessionPayload } from "@/src/types/workout";
+// import { GetSessionsParams } from "@/src/types/workout";
+// import { ReorderExercisePayload } from "@/src/types/workout";
+// import { UpdatePlannedExercisePayload } from "@/src/types/workout";
+// import { CreatePlannedExercisePayload } from "@/src/types/workout";
+// import { UpdateWorkoutDayPayload } from "@/src/types/workout";
+// import { CreateWorkoutDayPayload } from "@/src/types/workout";
+// import { UpdateWorkoutPlanPayload } from "@/src/types/workout";
+
+
+
+
+
+
+export type MuscleGroup =
+  | "CHEST"
+  | "BACK"
+  | "SHOULDERS"
+  | "BICEPS"
+  | "TRICEPS"
+  | "LEGS"
+  | "GLUTES"
+  | "CORE"
+  | "CARDIO"
+  | "FULL_BODY";
+
+export type WorkoutStatus = "PLANNED" | "IN_PROGRESS" | "COMPLETED" | "SKIPPED";
+
+export type Mood = "EXCELLENT" | "GOOD" | "AVERAGE" | "TIRED" | "POOR";
+
+
+
+export interface WorkoutDay {
+  id: string;
+  weeklyPlanId: string;
+  dayOfWeek: number; // 1=Monday, 7=Sunday
+  name: string;
+  isRestDay?: boolean;
+  notes?: string | null;
+  order: number;
+  exercises?: PlannedExercise[];
+  createdAt: string;
+  updatedAt: string;
+  _count?: {
+    exercises: number;
+    sessions: number;
+  };
+}
+
+export interface PlannedExercise {
+  id: string;
+  workoutDayId: string;
+  exerciseName: string;
+  muscleGroup: MuscleGroup;
+  targetSets: number;
+  targetReps: string;
+  targetWeight?: number | null;
+  restSeconds?: number | null;
+  notes?: string | null;
+  videoUrl?: string | null;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkoutSession {
+  id: string;
+  userId: string;
+  workoutDayId?: string | null;
+  sessionDate: string;
+  dayName: string;
+  status: WorkoutStatus;
+  startedAt: string;
+  completedAt?: string | null;
+  durationMin?: number | null;
+  totalSets: number;
+  totalVolume?: number | null;
+  mood?: Mood | null;
+  energyLevel?: number | null;
+  notes?: string | null;
+  xpEarned: number;
+  workoutDay?: WorkoutDay;
+  exerciseSets?: ExerciseSet[];
+}
+
+export interface ExerciseSet {
+  id: string;
+  sessionId: string;
+  exerciseName: string;
+  muscleGroup: MuscleGroup;
+  setNumber: number;
+  reps: number;
+  weight?: number | null;
+  restSeconds?: number | null;
+  formRating?: number | null; // 1-5
+  difficulty?: number | null; // 1-5
+  notes?: string | null;
+  isPersonalRecord: boolean;
+  previousReps?: number | null;
+  previousWeight?: number | null;
+  improvement?: string | null;
+  createdAt: string;
+  session?: {
+    id: string;
+    sessionDate: string;
+    dayName: string;
+  };
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+  errors?: Record<string, unknown>;
+  error?: {
+    code: string;
+    message: string;
+  };
+  meta?: {
+    pagination?: {
+      total: number;
+      limit: number;
+      offset: number;
+    };
+  };
+}
+
+export interface CreateWorkoutPlanPayload {
+  name: string;
+  description?: string;
+  startDate?: string;
+}
+
+export interface UpdateWorkoutPlanPayload {
+  name?: string;
+  description?: string;
+  endDate?: string;
+}
+
+export interface CreateWorkoutDayPayload {
+  dayOfWeek: number;
+  name: string;
+  isRestDay?: boolean;
+  notes?: string;
+  order?: number;
+}
+
+export interface UpdateWorkoutDayPayload {
+  name?: string;
+  isRestDay?: boolean;
+  notes?: string;
+  order?: number;
+}
+
+export interface CreatePlannedExercisePayload {
+  exerciseName: string;
+  muscleGroup: MuscleGroup;
+  targetSets: number;
+  targetReps: string;
+  targetWeight?: number;
+  restSeconds?: number;
+  notes?: string;
+  videoUrl?: string;
+  order?: number;
+}
+
+export interface UpdatePlannedExercisePayload {
+  exerciseName?: string;
+  muscleGroup?: MuscleGroup;
+  targetSets?: number;
+  targetReps?: string;
+  targetWeight?: number;
+  restSeconds?: number;
+  notes?: string;
+  videoUrl?: string;
+  order?: number;
+}
+
+export interface CreateWorkoutSessionPayload {
+  workoutDayId?: string;
+  sessionDate?: string;
+  dayName: string;
+  notes?: string;
+}
+
+export interface UpdateWorkoutSessionPayload {
+  status?: WorkoutStatus;
+  completedAt?: string;
+  durationMin?: number;
+  mood?: Mood;
+  energyLevel?: number;
+  notes?: string;
+}
+
+export interface CompleteSessionPayload {
+  mood?: Mood;
+  energyLevel?: number;
+  notes?: string;
+}
+
+export interface CreateExerciseSetPayload {
+  exerciseName: string;
+  muscleGroup: MuscleGroup;
+  setNumber: number;
+  reps: number;
+  weight?: number;
+  restSeconds?: number;
+  formRating?: number;
+  difficulty?: number;
+  notes?: string;
+}
+
+export interface BulkSetPayload {
+  exerciseName: string;
+  muscleGroup: MuscleGroup;
+  sets: Array<{
+    setNumber: number;
+    reps: number;
+    weight?: number;
+    restSeconds?: number;
+    formRating?: number;
+    difficulty?: number;
+    notes?: string;
+  }>;
+}
+
+export interface UpdateExerciseSetPayload {
+  reps?: number;
+  weight?: number;
+  restSeconds?: number;
+  formRating?: number;
+  difficulty?: number;
+  isPersonalRecord?: boolean;
+  notes?: string;
+}
+
+export interface ReorderExercisePayload {
+  exerciseId: string;
+  newOrder: number;
+}
+
+export interface GetSessionsParams {
+  status?: WorkoutStatus;
+  limit?: number;
+  offset?: number;
+  startDate?: string;
+  endDate?: string;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 // ==================== Workout Plans ====================
-export async function getAllWorkoutPlans(): Promise<ApiResponse<WorkoutPlan[]>> {
+export async function getAllWorkoutPlans(){
   try {
     const response = await dataFetch.get("/workout-plans", {
       next: { tags: ["workout-plans"] },
@@ -38,7 +289,7 @@ export async function getAllWorkoutPlans(): Promise<ApiResponse<WorkoutPlan[]>> 
   }
 }
 
-export async function getActiveWorkoutPlan(): Promise<ApiResponse<WorkoutPlan>> {
+export async function getActiveWorkoutPlan(){
   try {
     const response = await dataFetch.get("/workout-plans/active", {
       next: { tags: ["workout-plans", "active-plan"] },
@@ -50,7 +301,7 @@ export async function getActiveWorkoutPlan(): Promise<ApiResponse<WorkoutPlan>> 
   }
 }
 
-export async function getWorkoutPlanById(planId: string): Promise<ApiResponse<WorkoutPlan>> {
+export async function getWorkoutPlanById(planId: string){
   try {
     const response = await dataFetch.get(`/workout-plans/${planId}`, {
       next: { tags: ["workout-plans", `workout-plan-${planId}`] },
@@ -62,9 +313,11 @@ export async function getWorkoutPlanById(planId: string): Promise<ApiResponse<Wo
   }
 }
 
+
+
 export async function createWorkoutPlan(
-  payload: CreateWorkoutPlanPayload
-): Promise<ApiResponse<WorkoutPlan>> {
+  payload:WorkoutPlan
+){
   try {
     const response = await dataFetch.post("/workout-plans", {
       body: JSON.stringify(payload),
@@ -87,7 +340,7 @@ export async function createWorkoutPlan(
 export async function updateWorkoutPlan(
   planId: string,
   payload: UpdateWorkoutPlanPayload
-): Promise<ApiResponse<WorkoutPlan>> {
+){
   try {
     const response = await dataFetch.put(`/workout-plans/${planId}`, {
       body: JSON.stringify(payload),
@@ -108,7 +361,7 @@ export async function updateWorkoutPlan(
   }
 }
 
-export async function activateWorkoutPlan(planId: string): Promise<ApiResponse<WorkoutPlan>> {
+export async function activateWorkoutPlan(planId: string){
   try {
     const response = await dataFetch.patch(`/workout-plans/${planId}/activate`);
     const result = await response.json();
@@ -125,7 +378,7 @@ export async function activateWorkoutPlan(planId: string): Promise<ApiResponse<W
   }
 }
 
-export async function deleteWorkoutPlan(planId: string): Promise<ApiResponse<void>> {
+export async function deleteWorkoutPlan(planId: string){
   try {
     const response = await dataFetch.delete(`/workout-plans/${planId}`);
     const result = await response.json();
@@ -143,7 +396,7 @@ export async function deleteWorkoutPlan(planId: string): Promise<ApiResponse<voi
 }
 
 // ==================== Workout Days ====================
-export async function getWorkoutDaysByPlan(planId: string): Promise<ApiResponse<WorkoutDay[]>> {
+export async function getWorkoutDaysByPlan(planId: string){
   try {
     const response = await dataFetch.get(`/workout-days/plan/${planId}`, {
       next: { tags: ["workout-days", `workout-days-${planId}`] },
@@ -155,11 +408,10 @@ export async function getWorkoutDaysByPlan(planId: string): Promise<ApiResponse<
   }
 }
 
-export async function getTodayWorkoutDay(): Promise<ApiResponse<WorkoutDay>> {
+export async function getTodayWorkoutDay(){
   try {
     const response = await dataFetch.get("/workout-days/today", {
-      // next: { tags: ["today-workout"] }, // Cache for 1 hour
-      next: { tags: ["today-workout"], revalidate: 3600 }, // Cache for 1 hour
+      next: { tags: ["today-workout"], revalidate: 3600 },
     });
     return response.json();
   } catch (error) {
@@ -168,7 +420,7 @@ export async function getTodayWorkoutDay(): Promise<ApiResponse<WorkoutDay>> {
   }
 }
 
-export async function getWorkoutDayById(dayId: string): Promise<ApiResponse<WorkoutDay>> {
+export async function getWorkoutDayById(dayId: string){
   try {
     const response = await dataFetch.get(`/workout-days/${dayId}`, {
       next: { tags: ["workout-days", `workout-day-${dayId}`] },
@@ -183,7 +435,7 @@ export async function getWorkoutDayById(dayId: string): Promise<ApiResponse<Work
 export async function createWorkoutDay(
   planId: string,
   payload: CreateWorkoutDayPayload
-): Promise<ApiResponse<WorkoutDay>> {
+){
   try {
     const response = await dataFetch.post(`/workout-days/plan/${planId}`, {
       body: JSON.stringify(payload),
@@ -207,7 +459,7 @@ export async function createWorkoutDay(
 export async function updateWorkoutDay(
   dayId: string,
   payload: UpdateWorkoutDayPayload
-): Promise<ApiResponse<WorkoutDay>> {
+){
   try {
     const response = await dataFetch.put(`/workout-days/${dayId}`, {
       body: JSON.stringify(payload),
@@ -229,7 +481,7 @@ export async function updateWorkoutDay(
   }
 }
 
-export async function deleteWorkoutDay(dayId: string): Promise<ApiResponse<void>> {
+export async function deleteWorkoutDay(dayId: string){
   try {
     const response = await dataFetch.delete(`/workout-days/${dayId}`);
     const result = await response.json();
@@ -249,7 +501,7 @@ export async function deleteWorkoutDay(dayId: string): Promise<ApiResponse<void>
 // ==================== Planned Exercises ====================
 export async function getPlannedExercisesByDay(
   dayId: string
-): Promise<ApiResponse<PlannedExercise[]>> {
+) {
   try {
     const response = await dataFetch.get(`/planned-exercises/day/${dayId}`, {
       next: { tags: ["planned-exercises", `planned-exercises-${dayId}`] },
@@ -263,7 +515,7 @@ export async function getPlannedExercisesByDay(
 
 export async function getPlannedExerciseById(
   exerciseId: string
-): Promise<ApiResponse<PlannedExercise>> {
+){
   try {
     const response = await dataFetch.get(`/planned-exercises/${exerciseId}`, {
       next: { tags: ["planned-exercises", `planned-exercise-${exerciseId}`] },
@@ -278,7 +530,7 @@ export async function getPlannedExerciseById(
 export async function createPlannedExercise(
   dayId: string,
   payload: CreatePlannedExercisePayload
-): Promise<ApiResponse<PlannedExercise>> {
+){
   try {
     const response = await dataFetch.post(`/planned-exercises/day/${dayId}`, {
       body: JSON.stringify(payload),
@@ -302,7 +554,7 @@ export async function createPlannedExercise(
 export async function updatePlannedExercise(
   exerciseId: string,
   payload: UpdatePlannedExercisePayload
-): Promise<ApiResponse<PlannedExercise>> {
+){
   try {
     const response = await dataFetch.put(`/planned-exercises/${exerciseId}`, {
       body: JSON.stringify(payload),
@@ -323,7 +575,7 @@ export async function updatePlannedExercise(
   }
 }
 
-export async function deletePlannedExercise(exerciseId: string): Promise<ApiResponse<void>> {
+export async function deletePlannedExercise(exerciseId: string){
   try {
     const response = await dataFetch.delete(`/planned-exercises/${exerciseId}`);
     const result = await response.json();
@@ -343,7 +595,7 @@ export async function deletePlannedExercise(exerciseId: string): Promise<ApiResp
 export async function reorderPlannedExercises(
   dayId: string,
   payload: ReorderExercisePayload[]
-): Promise<ApiResponse<void>> {
+) {
   try {
     const response = await dataFetch.post(`/planned-exercises/day/${dayId}/reorder`, {
       body: JSON.stringify(payload),
@@ -365,7 +617,7 @@ export async function reorderPlannedExercises(
 
 export async function duplicatePlannedExercise(
   exerciseId: string
-): Promise<ApiResponse<PlannedExercise>> {
+){
   try {
     const response = await dataFetch.post(`/planned-exercises/${exerciseId}/duplicate`);
     const result = await response.json();
@@ -384,7 +636,7 @@ export async function duplicatePlannedExercise(
 // ==================== Workout Sessions ====================
 export async function getAllWorkoutSessions(
   params?: GetSessionsParams
-): Promise<ApiResponse<WorkoutSession[]>> {
+){
   try {
     const queryParams = new URLSearchParams();
     if (params?.status) queryParams.append("status", params.status);
@@ -405,11 +657,9 @@ export async function getAllWorkoutSessions(
   }
 }
 
-export async function getCurrentWorkoutSession(): Promise<ApiResponse<WorkoutSession | null>> {
+export async function getCurrentWorkoutSession(){
   try {
-    const response = await dataFetch.get("/workout-sessions/current", {
-      cache: "no-store", 
-    });
+    const response = await dataFetch.get("/workout-sessions/current");
     return response.json();
   } catch (error) {
     console.error("Get current session error:", error);
@@ -417,7 +667,7 @@ export async function getCurrentWorkoutSession(): Promise<ApiResponse<WorkoutSes
   }
 }
 
-export async function getLastWorkoutSession(): Promise<ApiResponse<WorkoutSession | null>> {
+export async function getLastWorkoutSession(){
   try {
     const response = await dataFetch.get("/workout-sessions/last", {
       next: { tags: ["last-workout"], revalidate: 3600 }
@@ -431,7 +681,7 @@ export async function getLastWorkoutSession(): Promise<ApiResponse<WorkoutSessio
 
 export async function getWorkoutSessionById(
   sessionId: string
-): Promise<ApiResponse<WorkoutSession>> {
+){
   try {
     const response = await dataFetch.get(`/workout-sessions/${sessionId}`, {
       next: { tags: ["workout-sessions", `workout-session-${sessionId}`] },
@@ -445,7 +695,7 @@ export async function getWorkoutSessionById(
 
 export async function createWorkoutSession(
   payload: CreateWorkoutSessionPayload
-): Promise<ApiResponse<WorkoutSession>> {
+){
   try {
     const response = await dataFetch.post("/workout-sessions", {
       body: JSON.stringify(payload),
@@ -468,7 +718,7 @@ export async function createWorkoutSession(
 export async function updateWorkoutSession(
   sessionId: string,
   payload: UpdateWorkoutSessionPayload
-): Promise<ApiResponse<WorkoutSession>> {
+){
   try {
     const response = await dataFetch.put(`/workout-sessions/${sessionId}`, {
       body: JSON.stringify(payload),
@@ -492,7 +742,7 @@ export async function updateWorkoutSession(
 export async function completeWorkoutSession(
   sessionId: string,
   payload?: CompleteSessionPayload
-): Promise<ApiResponse<WorkoutSession>> {
+){
   try {
     const response = await dataFetch.patch(`/workout-sessions/${sessionId}/complete`, {
       body: payload ? JSON.stringify(payload) : undefined,
@@ -513,7 +763,7 @@ export async function completeWorkoutSession(
   }
 }
 
-export async function skipWorkoutSession(sessionId: string): Promise<ApiResponse<WorkoutSession>> {
+export async function skipWorkoutSession(sessionId: string){
   try {
     const response = await dataFetch.patch(`/workout-sessions/${sessionId}/skip`);
     const result = await response.json();
@@ -530,7 +780,7 @@ export async function skipWorkoutSession(sessionId: string): Promise<ApiResponse
   }
 }
 
-export async function deleteWorkoutSession(sessionId: string): Promise<ApiResponse<void>> {
+export async function deleteWorkoutSession(sessionId: string){
   try {
     const response = await dataFetch.delete(`/workout-sessions/${sessionId}`);
     const result = await response.json();
@@ -550,7 +800,7 @@ export async function deleteWorkoutSession(sessionId: string): Promise<ApiRespon
 // ==================== Exercise Sets ====================
 export async function getExerciseSetsBySession(
   sessionId: string
-): Promise<ApiResponse<ExerciseSet[]>> {
+){
   try {
     const response = await dataFetch.get(`/exercise-sets/session/${sessionId}`, {
       next: { tags: ["exercise-sets", `exercise-sets-${sessionId}`] },
@@ -564,7 +814,7 @@ export async function getExerciseSetsBySession(
 
 export async function getGroupedExerciseSetsBySession(
   sessionId: string
-): Promise<ApiResponse<Record<string, ExerciseSet[]>>> {
+){
   try {
     const response = await dataFetch.get(`/exercise-sets/session/${sessionId}/grouped`, {
       next: { tags: ["exercise-sets", `exercise-sets-${sessionId}`] },
@@ -576,7 +826,7 @@ export async function getGroupedExerciseSetsBySession(
   }
 }
 
-export async function getExerciseSetById(setId: string): Promise<ApiResponse<ExerciseSet>> {
+export async function getExerciseSetById(setId: string){
   try {
     const response = await dataFetch.get(`/exercise-sets/${setId}`, {
       next: { tags: ["exercise-sets", `exercise-set-${setId}`] },
@@ -591,7 +841,7 @@ export async function getExerciseSetById(setId: string): Promise<ApiResponse<Exe
 export async function createExerciseSet(
   sessionId: string,
   payload: CreateExerciseSetPayload
-): Promise<ApiResponse<ExerciseSet>> {
+){
   try {
     const response = await dataFetch.post(`/exercise-sets/session/${sessionId}`, {
       body: JSON.stringify(payload),
@@ -612,10 +862,15 @@ export async function createExerciseSet(
   }
 }
 
+
+
+
+
+
 export async function createBulkExerciseSets(
   sessionId: string,
   payload: BulkSetPayload
-): Promise<ApiResponse<ExerciseSet[]>> {
+){
   try {
     const response = await dataFetch.post(`/exercise-sets/session/${sessionId}/bulk`, {
       body: JSON.stringify(payload),
@@ -638,8 +893,8 @@ export async function createBulkExerciseSets(
 
 export async function updateExerciseSet(
   setId: string,
-  payload: UpdateExerciseSetPayload
-): Promise<ApiResponse<ExerciseSet>> {
+  payload:UpdateExerciseSetPayload
+){
   try {
     const response = await dataFetch.put(`/exercise-sets/${setId}`, {
       body: JSON.stringify(payload),
@@ -660,7 +915,7 @@ export async function updateExerciseSet(
   }
 }
 
-export async function deleteExerciseSet(setId: string): Promise<ApiResponse<void>> {
+export async function deleteExerciseSet(setId: string){
   try {
     const response = await dataFetch.delete(`/exercise-sets/${setId}`);
     const result = await response.json();
@@ -680,7 +935,7 @@ export async function deleteExerciseSet(setId: string): Promise<ApiResponse<void
 export async function getExerciseHistory(
   exerciseName: string,
   limit?: number
-): Promise<ApiResponse<ExerciseSet[]>> {
+){
   try {
     const query = limit ? `?limit=${limit}` : "";
     const response = await dataFetch.get(
@@ -696,7 +951,7 @@ export async function getExerciseHistory(
   }
 }
 
-export async function getPersonalRecords(): Promise<ApiResponse<ExerciseSet[]>> {
+export async function getPersonalRecords(){
   try {
     const response = await dataFetch.get("/exercise-sets/personal-records", {
       next: { tags: ["personal-records"], revalidate: 3600 },

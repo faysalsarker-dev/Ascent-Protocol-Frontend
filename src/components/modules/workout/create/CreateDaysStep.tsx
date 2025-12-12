@@ -1,4 +1,4 @@
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -34,6 +34,7 @@ import {
   HexagonIcon,
   StatusBadge
 } from "@/src/components/modules/today-task/GamifiedEffects";
+import { useCreateWorkoutDay } from "@/src/hooks/useWorkoutPlan";
 
 const DAYS_OF_WEEK = [
   { value: 1, label: "Monday" },
@@ -57,13 +58,13 @@ type DayFormData = z.infer<typeof daySchema>;
 const CreateDaysStep = () => {
   const { state, addDay, goToNextStep, goToPreviousStep } = useWorkoutBuilder();
   const { workoutPlan, workoutDays } = state;
+const {mutateAsync , isPending}=useCreateWorkoutDay(workoutPlan?.id as string)
 
   const {
     register,
     handleSubmit,
     control,
     reset,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<DayFormData>({
     resolver: zodResolver(daySchema),
@@ -72,22 +73,37 @@ const CreateDaysStep = () => {
     },
   });
 
-  const isRestDay = watch("isRestDay");
+    const isRestDay = useWatch({
+      control, 
+      name: "isRestDay",
+    });
+  // const isRestDay = watch("isRestDay");
   const usedDays = workoutDays.map((d) => d.dayOfWeek);
   const availableDays = DAYS_OF_WEEK.filter((d) => !usedDays.includes(d.value));
 
   const handleAddDay = async (data: DayFormData) => {
-    // Simulate API call - replace with actual mutation
-    await new Promise(resolve => setTimeout(resolve, 500));
+
+const payload = {
+   dayOfWeek: data.dayOfWeek, 
+      name: data.name, 
+      isRestDay: data.isRestDay, 
+      notes: data.notes,
+workoutPlanId:workoutPlan?.id
+}
+
+      const result = await mutateAsync(payload)
+
+      console.log(result);
     const dayData = { 
       dayOfWeek: data.dayOfWeek, 
       name: data.name, 
       isRestDay: data.isRestDay, 
       notes: data.notes,
-      id: `day-${Date.now()}`, 
+      id: result?.data?.id, 
       workoutPlanId: workoutPlan?.id 
     };
     addDay(dayData);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     reset({ isRestDay: false, dayOfWeek: undefined as any, name: "", notes: "" });
     toast.success("Training day added!");
   };
@@ -326,7 +342,7 @@ const CreateDaysStep = () => {
               </Label>
               <Textarea
                 placeholder="e.g., Focus on form"
-                className="bg-background/60 border-primary/30 focus:border-primary min-h-[80px]"
+                className="bg-background/60 border-primary/30 focus:border-primary min-h-20"
                 {...register("notes")}
               />
             </motion.div>
@@ -334,10 +350,10 @@ const CreateDaysStep = () => {
             {/* Add Button */}
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isPending}
               className="w-full h-11 font-system text-sm uppercase tracking-widest border border-primary/50 bg-primary/20 hover:bg-primary/30 text-primary"
             >
-              {isSubmitting ? (
+              {isSubmitting || isPending ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>

@@ -4,27 +4,11 @@ import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
 import { Dumbbell, Crown, ArrowRight, Calendar, Shield, Flame } from "lucide-react";
 import Link from "next/link";
+import { WorkoutPlan } from "./AllworkoutPlan";
 
-interface WorkoutDay {
-  id: string;
-  name: string;
-  isRestDay: boolean;
-  exercises?: unknown[];
-}
 
-interface WorkoutPlan {
-  id: string;
-  name: string;
-  description: string | null | undefined;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  startDate: string;
-  endDate: string | null;
-  userId: string;
-  workoutDays: WorkoutDay[];
-  _count: { workoutDays: number };
-}
+
+
 
 interface WorkoutPlanCardProps {
   plan: WorkoutPlan;
@@ -126,7 +110,7 @@ const WorkoutPlanCard: React.FC<WorkoutPlanCardProps> = ({ plan, index = 0 }) =>
               }`}
               variant={plan.isActive ? "outline" : "default"}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-500" />
+              <div className="absolute inset-0 bg-linear-to-r from-transparent via-primary/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-500" />
               <span className="relative z-10 flex items-center gap-2">
                 {plan.isActive ? "CURRENTLY ACTIVE" : "START PLAN"}
                 <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
@@ -136,7 +120,7 @@ const WorkoutPlanCard: React.FC<WorkoutPlanCardProps> = ({ plan, index = 0 }) =>
         </CardContent>
 
         {/* Hover glow */}
-        <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-t from-primary/5 to-transparent" />
+        <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-linear-to-t from-primary/5 to-transparent" />
       </Card>
     </motion.div>
   );

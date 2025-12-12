@@ -1,11 +1,10 @@
 
 "use client";
 
-import CreatePlanStep from "@/src/components/modules/workout/CreatePlanStep";
-import AddExercisesStep from "@/src/components/modules/workout/AddExercisesStep";
-import CreateDaysStep from "@/src/components/modules/workout/CreateDaysStep";
+import CreatePlanStep from "@/src/components/modules/workout/create/CreatePlanStep";
+import AddExercisesStep from "@/src/components/modules/workout/create/AddExercisesStep";
+import CreateDaysStep from "@/src/components/modules/workout/create/CreateDaysStep";
 import { Swords, Sparkles } from "lucide-react";
-import { Card } from "@/src/components/ui/card";
 import { ProgressBar } from "@/src/components/ui/ProgressBar";
 import { WorkoutBuilderProvider, useWorkoutBuilder } from "@/src/context/WorkoutBuilderContext";
 import { CornerBracket, GlitchText, HexagonIcon } from "@/src/components/modules/today-task/GamifiedEffects";

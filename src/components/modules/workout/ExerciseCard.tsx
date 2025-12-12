@@ -2,11 +2,14 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader } from "@/src/components/ui/card";
 import { Badge } from "@/src/components/ui/badge";
-import { Timer, Weight, Target, FileText, Play, Repeat } from "lucide-react";
-import { ExerciseSet } from "@/src/types/workout";
+import { Timer, Weight, Target, FileText,  Repeat } from "lucide-react";
+import { Exercise } from "./SinglePlan";
+
+
+
 
 interface ExerciseCardProps {
-  exercise: ExerciseSet;
+  exercise: Exercise;
   index: number;
 }
 
@@ -87,7 +90,7 @@ export function ExerciseCard({ exercise, index }: ExerciseCardProps) {
         </CardContent>
         
         {/* Subtle glow effect on hover */}
-        <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-t from-primary/5 to-transparent" />
+        <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-linear-to-t from-primary/5 to-transparent" />
       </Card>
     </motion.div>
   );

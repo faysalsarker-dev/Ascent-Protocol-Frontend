@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/purity */
 import { motion } from "framer-motion";
 import { User, Edit2, Shield, Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar";
@@ -20,6 +21,12 @@ const getRank = (level: number) => {
 
  const ProfileHeader = ({ name, email, avatar, level, onEditName }: ProfileHeaderProps) => {
   const { rank, class: rankClass, title } = getRank(level);
+
+
+
+
+
+
 
   return (
     <motion.div
@@ -64,7 +71,7 @@ const getRank = (level: number) => {
           <div className="absolute inset-0 rounded-full level-badge-game scale-110 blur-sm opacity-60" />
           
           {/* Avatar container */}
-          <div className="relative p-1 rounded-full bg-gradient-to-br from-primary via-secondary to-accent">
+          <div className="relative p-1 rounded-full bg-linear-to-br from-primary via-secondary to-accent">
             <Avatar className="w-28 h-28 border-4 border-background">
               <AvatarImage src={avatar || undefined} alt={name} />
               <AvatarFallback className="bg-card text-primary text-3xl font-display">

@@ -5,6 +5,7 @@ interface StatsGridProps {
   totalWorkouts: number;
   currentStreak: number;
   longestStreak: number;
+  goal:string
 }
 
 interface StatCardProps {
@@ -55,7 +56,8 @@ const StatCard = ({ icon, label, value, suffix, accentColor, delay, trend }: Sta
       {/* Value */}
       <div className="flex items-baseline gap-1">
         <span 
-          className="font-display text-3xl font-bold"
+className={`font-display ${typeof value === "string" ? "text-xl" : "text-3xl"} font-bold`}
+
           style={{ color: accentColor, textShadow: `0 0 20px ${accentColor}50` }}
         >
           {value}
@@ -76,8 +78,8 @@ const StatCard = ({ icon, label, value, suffix, accentColor, delay, trend }: Sta
   );
 };
 
-export const StatsGrid = ({ totalWorkouts, currentStreak, longestStreak }: StatsGridProps) => {
-  const questClear = Math.round((totalWorkouts / (totalWorkouts + 10)) * 100);
+export const StatsGrid = ({ totalWorkouts, currentStreak, longestStreak ,goal}: StatsGridProps) => {
+
 
   return (
     <motion.div
@@ -98,11 +100,10 @@ export const StatsGrid = ({ totalWorkouts, currentStreak, longestStreak }: Stats
       <div className="grid grid-cols-2 gap-3">
         <StatCard
           icon={<Swords className="w-5 h-5" />}
-          label="Dungeons Cleared"
+          label="Total Workouts"
           value={totalWorkouts}
           accentColor="hsl(195, 100%, 50%)"
           delay={0.7}
-          trend="+12 this week"
         />
         <StatCard
           icon={<Flame className="w-5 h-5" />}
@@ -111,7 +112,6 @@ export const StatsGrid = ({ totalWorkouts, currentStreak, longestStreak }: Stats
           suffix="days"
           accentColor="hsl(0, 90%, 55%)"
           delay={0.8}
-          trend="On fire!"
         />
         <StatCard
           icon={<Trophy className="w-5 h-5" />}
@@ -123,9 +123,9 @@ export const StatsGrid = ({ totalWorkouts, currentStreak, longestStreak }: Stats
         />
         <StatCard
           icon={<Target className="w-5 h-5" />}
-          label="Quest Clear Rate"
-          value={questClear}
-          suffix="%"
+          label="Goal"
+          value={goal}
+          suffix=""
           accentColor="hsl(260, 80%, 55%)"
           delay={1.0}
         />

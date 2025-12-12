@@ -86,3 +86,28 @@ export async function deleteAllChatHistory() {
   revalidateTag(TAG,{});
   return res.json();
 }
+
+
+export async function getPostWorkoutToday() {
+  const res = await dataFetch.post(`${BASE}/post-workout`, {
+    next: { tags: [TAG, "TODAY"] },
+  });
+
+  if (!res.ok) {
+    return { success: false, error: "Failed to load post-workout feedback." };
+  }
+
+  return res.json();
+}
+
+export async function getPreWorkoutToday() {
+  const res = await dataFetch.get(`${BASE}/pre-workout`, {
+    next: { tags: [TAG, "TODAY"] },
+  });
+
+  if (!res.ok) {
+    return { success: false, error: "Failed to load pre-workout suggestion." };
+  }
+
+  return res.json();
+}

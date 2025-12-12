@@ -47,10 +47,8 @@ const update = useUpdateUser()
 
 
 
+console.log(user,"users")
 
-  const updateUserInfo = async(data)=>{
-    const result = update(data)
-  }
 
 
 
@@ -89,7 +87,7 @@ const update = useUpdateUser()
         <ProfileHeader
           name={user.name}
           email={user.email}
-          avatar={userData.avatar}
+          avatar={user.avatar}
           level={user.level}
           onEditName={() => setEditNameOpen(true)}
         />
@@ -107,9 +105,10 @@ const update = useUpdateUser()
 
 
         <StatsGrid
-          totalWorkouts={userData.totalWorkouts}
-          currentStreak={userData.currentStreak}
-          longestStreak={userData.longestStreak}
+          totalWorkouts={user.totalWorkouts}
+          currentStreak={user.currentStreak}
+          longestStreak={user.longestStreak}
+          goal={user.currentGoal}
         />
 
 

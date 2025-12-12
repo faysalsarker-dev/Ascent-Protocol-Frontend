@@ -7,7 +7,24 @@ import {
   updateExerciseSet,
   deleteExerciseSet,
 } from "../services/workout/workout.service";
-import type { ExerciseSet, CreateExerciseSetPayload, BulkSetPayload, UpdateExerciseSetPayload } from "./../types/workout.d";
+import type { ExerciseSet, CreateExerciseSetPayload, BulkSetPayload, UpdateExerciseSetPayload } from "../types/workouts";
+
+
+
+
+export interface CreateExercisePayload {
+  exerciseName: string;
+  muscleGroup: string;
+  sets: {
+    setNumber: number;
+    reps: number;
+    weight: number;
+  }[];
+}
+
+
+
+
 
 // ------------------ QUERY ------------------
 export function useGetExerciseSetById(setId?: string) {
@@ -34,7 +51,7 @@ export function useCreateExerciseSet(sessionId: string) {
 export function useCreateExerciseSetBulk(sessionId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: BulkSetPayload) => createBulkExerciseSets(sessionId, payload),
+    mutationFn: (payload: CreateExercisePayload) => createBulkExerciseSets(sessionId, payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["exercise-sets"] });
       qc.invalidateQueries({ queryKey: ["exercise-sets", sessionId] });

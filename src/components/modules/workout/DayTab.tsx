@@ -21,7 +21,7 @@ function DayTab({ name, dayNumber, isActive, isRestDay, isToday, onClick }: DayT
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={cn(
-        "relative flex flex-col items-center gap-0.5 sm:gap-1 px-2.5 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-300 min-w-[64px] sm:min-w-[80px]",
+        "relative flex flex-col items-center gap-0.5 sm:gap-1 px-2.5 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-300 min-w-16 sm:min-w-20",
         "border border-border/50 backdrop-blur-sm",
         isActive
           ? "bg-primary/20 border-primary glow-primary-sm"

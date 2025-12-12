@@ -25,6 +25,35 @@ export interface PlannedExercise {
   workoutDayId?: string;
 }
 
+
+
+
+
+export interface ExerciseFormData  {
+  exerciseName: string;
+  muscleGroup:
+    | "CHEST"
+    | "BACK"
+    | "SHOULDERS"
+    | "BICEPS"
+    | "TRICEPS"
+    | "LEGS"
+    | "GLUTES"
+    | "CORE"
+    | "CARDIO"
+    | "FULL_BODY";
+  targetReps: string;
+  targetSets: number;
+  targetWeight?: number;
+  restSeconds?: number;
+  notes?: string;
+};
+
+
+
+
+
+
 export type MuscleGroup =
   | "CHEST"
   | "BACK"
@@ -43,3 +72,5 @@ export interface WorkoutBuilderState {
   workoutDays: WorkoutDay[];
   exercises: Record<string, PlannedExercise[]>;
 }
+
+

@@ -1,8 +1,31 @@
-import { motion } from 'framer-motion';
-import { Exercise } from '@/src/types/workout';
-import { Target, ChevronRight, Check, FileText, Zap, Swords } from 'lucide-react';
-import { Card } from '@/src/components/ui/card';
-import { CornerBracket } from './GamifiedEffects';
+import { motion } from "framer-motion";
+import {
+  Target,
+  ChevronRight,
+  Check,
+  FileText,
+  Zap,
+  Swords,
+} from "lucide-react";
+import { Card } from "@/src/components/ui/card";
+import { CornerBracket } from "./GamifiedEffects";
+
+type Exercise = {
+  id?: string;
+  exerciseName?: string;
+  muscleGroup:
+    | "CHEST"
+    | "BACK"
+    | "LEGS"
+    | "ARMS"
+    | "SHOULDER"
+    | "CARDIO"
+    | "CORE"
+    | "FULL_BODY";
+  targetSets: number;
+  targetReps: string;
+  notes?: string | undefined;
+};
 
 interface TaskCardProps {
   exercise: Exercise;
@@ -11,7 +34,12 @@ interface TaskCardProps {
   onClick: () => void;
 }
 
-export const TaskCard = ({ exercise, index, isCompleted = false, onClick }: TaskCardProps) => {
+export const TaskCard = ({
+  exercise,
+  index,
+  isCompleted = false,
+  onClick,
+}: TaskCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, x: -30 }}
@@ -25,15 +53,21 @@ export const TaskCard = ({ exercise, index, isCompleted = false, onClick }: Task
     >
       <Card
         className={`relative overflow-hidden cursor-pointer transition-all duration-300 rounded-sm border ${
-          isCompleted 
-            ? 'bg-primary/10 border-primary/40' 
-            : 'bg-card/30 hover:bg-card/60 border-border/40 hover:border-primary/40'
+          isCompleted
+            ? "bg-primary/10 border-primary/40"
+            : "bg-card/30 hover:bg-card/60 border-border/40 hover:border-primary/40"
         }`}
         onClick={onClick}
       >
         {/* Corner Brackets */}
-        <CornerBracket position="tl" color={isCompleted ? "primary" : "primary"} />
-        <CornerBracket position="br" color={isCompleted ? "primary" : "primary"} />
+        <CornerBracket
+          position="tl"
+          color={isCompleted ? "primary" : "primary"}
+        />
+        <CornerBracket
+          position="br"
+          color={isCompleted ? "primary" : "primary"}
+        />
 
         {/* Completed glow effect */}
         {isCompleted && (
@@ -42,7 +76,8 @@ export const TaskCard = ({ exercise, index, isCompleted = false, onClick }: Task
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             style={{
-              background: 'linear-gradient(90deg, hsl(var(--primary) / 0.1), transparent, hsl(var(--primary) / 0.1))',
+              background:
+                "linear-gradient(90deg, hsl(var(--primary) / 0.1), transparent, hsl(var(--primary) / 0.1))",
             }}
           />
         )}
@@ -52,9 +87,9 @@ export const TaskCard = ({ exercise, index, isCompleted = false, onClick }: Task
           className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100"
           whileHover={{
             background: [
-              'linear-gradient(90deg, transparent, hsl(var(--primary) / 0.1), transparent)',
+              "linear-gradient(90deg, transparent, hsl(var(--primary) / 0.1), transparent)",
             ],
-            backgroundPosition: ['0% 0%', '200% 0%'],
+            backgroundPosition: ["0% 0%", "200% 0%"],
           }}
           transition={{ duration: 1, repeat: Infinity }}
         />
@@ -64,27 +99,37 @@ export const TaskCard = ({ exercise, index, isCompleted = false, onClick }: Task
             {/* Index/Check Badge */}
             <motion.div
               className={`relative w-12 h-12 rounded-sm flex items-center justify-center font-mono text-sm font-bold border ${
-                isCompleted 
-                  ? 'bg-primary text-primary-foreground border-primary' 
-                  : 'bg-muted/30 text-muted-foreground border-border/50'
+                isCompleted
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-muted/30 text-muted-foreground border-border/50"
               }`}
-              animate={isCompleted ? {
-                boxShadow: ['0 0 0 0 hsl(var(--primary) / 0)', '0 0 15px 3px hsl(var(--primary) / 0.4)', '0 0 0 0 hsl(var(--primary) / 0)'],
-              } : {}}
+              animate={
+                isCompleted
+                  ? {
+                      boxShadow: [
+                        "0 0 0 0 hsl(var(--primary) / 0)",
+                        "0 0 15px 3px hsl(var(--primary) / 0.4)",
+                        "0 0 0 0 hsl(var(--primary) / 0)",
+                      ],
+                    }
+                  : {}
+              }
               transition={{ duration: 2, repeat: Infinity }}
             >
               {isCompleted ? (
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
                   animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: 'spring', stiffness: 300 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
                   <Check className="w-6 h-6" />
                 </motion.div>
               ) : (
-                <span className="text-lg">{String(index + 1).padStart(2, '0')}</span>
+                <span className="text-lg">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
               )}
-              
+
               {/* Corner accent */}
               <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary/50" />
             </motion.div>
@@ -92,7 +137,13 @@ export const TaskCard = ({ exercise, index, isCompleted = false, onClick }: Task
             {/* Exercise Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h3 className={`font-semibold truncate ${isCompleted ? 'text-primary line-through' : 'text-foreground'}`}>
+                <h3
+                  className={`font-semibold truncate ${
+                    isCompleted
+                      ? "text-primary line-through"
+                      : "text-foreground"
+                  }`}
+                >
                   {exercise.exerciseName}
                 </h3>
                 {isCompleted && (
@@ -102,21 +153,25 @@ export const TaskCard = ({ exercise, index, isCompleted = false, onClick }: Task
                     className="flex items-center gap-1 px-1.5 py-0.5 bg-yellow-500/20 border border-yellow-500/30 rounded-sm"
                   >
                     <Zap className="w-3 h-3 text-yellow-500" />
-                    <span className="text-[10px] font-mono text-yellow-500">+25 XP</span>
+                    <span className="text-[10px] font-mono text-yellow-500">
+                      +25 XP
+                    </span>
                   </motion.div>
                 )}
               </div>
-              
+
               <div className="flex items-center gap-3 mt-1.5">
                 <div className="flex items-center gap-1 text-sm text-primary">
                   <Target className="w-3 h-3" />
                   <span className="font-mono">{exercise.targetSets} sets</span>
                 </div>
-                
-                {exercise.targetReps !== '0' && (
+
+                {exercise.targetReps !== "0" && (
                   <div className="flex items-center gap-1 text-sm text-muted-foreground">
                     <Swords className="w-3 h-3" />
-                    <span className="font-mono">{exercise.targetReps} reps</span>
+                    <span className="font-mono">
+                      {exercise.targetReps} reps
+                    </span>
                   </div>
                 )}
               </div>
@@ -142,7 +197,7 @@ export const TaskCard = ({ exercise, index, isCompleted = false, onClick }: Task
 
           {/* Notes */}
           {exercise.notes && (
-            <motion.div 
+            <motion.div
               className="mt-3 pt-3 border-t border-border/20"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

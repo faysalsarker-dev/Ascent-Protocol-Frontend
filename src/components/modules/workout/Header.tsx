@@ -54,7 +54,7 @@ const AllPlansHeader = () => {
               className="flex items-center gap-2 font-medium group relative overflow-hidden"
               size="lg"
             >
-              <div className="absolute inset-0 bg-linear-to-r from-primary/0 via-primary/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              <div className="absolute inset-0 bg-linear-to-r from-primary/0 via-primary/20 to-primary/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               <Plus className="w-5 h-5 group-hover:rotate-90 transition-all duration-300" />
               <span className="relative z-10">CREATE PLAN</span>
             </Button>

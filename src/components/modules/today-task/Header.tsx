@@ -88,7 +88,7 @@ export const Header = () => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.3, type: 'spring', stiffness: 200 }}
         >
-          <GlitchText className="bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+          <GlitchText className="bg-linear-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
             DAILY QUEST
           </GlitchText>
         </motion.h1>
@@ -120,7 +120,7 @@ export const Header = () => {
         {/* Decorative Line */}
         <div className="flex items-center justify-center gap-3 mt-4">
           <motion.div
-            className="h-px w-16 bg-gradient-to-r from-transparent to-primary"
+            className="h-px w-16 bg-linear-to-r from-transparent to-primary"
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ delay: 0.6, duration: 0.5 }}
@@ -134,7 +134,7 @@ export const Header = () => {
             transition={{ duration: 3, repeat: Infinity }}
           />
           <motion.div
-            className="h-px w-16 bg-gradient-to-l from-transparent to-primary"
+            className="h-px w-16 bg-linear-to-l from-transparent to-primary"
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ delay: 0.6, duration: 0.5 }}

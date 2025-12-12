@@ -9,6 +9,8 @@ import {
   deleteChatMessage,
   deleteAllChatHistory,
   getChatHistoryToday,
+  getPreWorkoutToday,
+  getPostWorkoutToday,
 } from "@/src/services/chat/chat.service";
 
 // ------------------ QUERIES ------------------
@@ -74,6 +76,33 @@ export function useDeleteAllChatHistory() {
 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["chat-history"] });
+    },
+  });
+}
+
+
+
+export function usePreWorkout() {
+  return useQuery({
+    queryKey: ["preWorkout"],
+    queryFn: () => getPreWorkoutToday(),
+    
+  });
+
+
+ 
+}
+
+
+
+export function usePostWorkoutToday() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => getPostWorkoutToday(),
+
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["post-Workout"] });
     },
   });
 }

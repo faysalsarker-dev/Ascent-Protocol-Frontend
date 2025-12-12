@@ -14,10 +14,15 @@ import { WorkoutSkeleton } from "./WorkoutSkeleton";
 import { WorkoutError } from "./WorkoutError";
 import { useState } from "react";
 
-interface Exercise {
-  id: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+export interface Exercise {
+ 
+    exerciseName:string;
+  muscleGroup:string;
+  targetSets:number;
+  targetReps:number;
+  targetWeight:number;
+  restSeconds:number;
+  notes?:string
 }
 
 interface WorkoutDay {
@@ -38,6 +43,9 @@ interface WorkoutPlan {
 interface SinglePlanProps {
   id: string;
 }
+
+
+
 
 const SinglePlan = ({ id }: SinglePlanProps) => {
   const { data: info, isLoading, isError, refetch } = useGetAllPlansById(id);
@@ -180,8 +188,8 @@ const SinglePlan = ({ id }: SinglePlanProps) => {
               <RestDayCard />
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
-                {selectedDay.exercises?.map((exercise, idx) => (
-                  <ExerciseCard key={exercise.id} exercise={exercise} index={idx} />
+                {selectedDay.exercises?.map((exercise:Exercise, idx) => (
+                  <ExerciseCard key={idx} exercise={exercise} index={idx} />
                 ))}
               </div>
             )}

@@ -1,6 +1,4 @@
 import { useForm, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/src/components/ui/button";
@@ -34,6 +32,8 @@ import {
   HexagonIcon,
   StatusBadge
 } from "@/src/components/modules/today-task/GamifiedEffects";
+import { useCreateExercise } from "@/src/hooks/useWorkoutPlan";
+import { ExerciseFormData } from "@/src/types/workout.types";
 
 type MuscleGroup = 
   | "CHEST"
@@ -70,48 +70,18 @@ const DAYS_MAP: Record<number, string> = {
   7: "Sunday",
 };
 
-const exerciseSchema = z.object({
-  exerciseName: z.string().min(2, "Exercise name required").max(50),
-  muscleGroup: z.enum(MUSCLE_GROUPS as [MuscleGroup, ...MuscleGroup[]]),
-  targetReps: z.string().min(1, "Required"),
-  targetSets: z.preprocess(
-    (val) => {
-      if (val === '' || val === null || val === undefined) return undefined;
-      const num = Number(val);
-      return isNaN(num) ? undefined : num;
-    },
-    z.number().positive("Must be positive")
-  ),
-  targetWeight: z.preprocess(
-    (val) => {
-      if (val === '' || val === null || val === undefined) return undefined;
-      const num = Number(val);
-      return isNaN(num) ? undefined : num;
-    },
-    z.number().positive("Must be positive").optional()
-  ),
-  restSeconds: z.preprocess(
-    (val) => {
-      if (val === '' || val === null || val === undefined) return undefined;
-      const num = Number(val);
-      return isNaN(num) ? undefined : num;
-    },
-    z.number().int("Must be a whole number").positive("Must be positive").optional()
-  ),
-  notes: z.string().max(200).optional(),
-});
 
-type ExerciseFormData = z.infer<typeof exerciseSchema>;
 
 const AddExercisesStep = () => {
-  const { state, addExercise, goToPreviousStep, reset } = useWorkoutBuilder();
+  const { state, addExercise, goToPreviousStep } = useWorkoutBuilder();
   const { workoutDays, exercises } = state;
-  
   const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+    const {mutateAsync , isPending}=useCreateExercise(selectedDayId as string)
+
 
   const workoutDays_filtered = workoutDays.filter((d) => !d.isRestDay);
   const selectedDay = workoutDays_filtered.find((d) => d.id === selectedDayId);
+
 
   const {
     register,
@@ -120,7 +90,6 @@ const AddExercisesStep = () => {
     reset: resetForm,
     formState: { errors },
   } = useForm<ExerciseFormData>({
-    resolver: zodResolver(exerciseSchema),
     defaultValues: {
       exerciseName: "",
       targetSets: 3,
@@ -137,11 +106,23 @@ const AddExercisesStep = () => {
       return;
     }
 
-    setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
+
+    const payload = {
+
+           exerciseName: data.exerciseName,
+      muscleGroup: data.muscleGroup,
+      targetReps: data.targetReps,
+      targetSets: data.targetSets,
+      targetWeight: data.targetWeight,
+      restSeconds: data.restSeconds,
+      notes: data.notes,
+    }
+
+const result = await mutateAsync(payload)
+  
     
     const exerciseData = {
-      id: `exercise-${Date.now()}`,
+      id: result?.data?.id,
       exerciseName: data.exerciseName,
       muscleGroup: data.muscleGroup,
       targetReps: data.targetReps,
@@ -159,7 +140,6 @@ const AddExercisesStep = () => {
       restSeconds: undefined,
       notes: "",
     });
-    setIsSubmitting(false);
     toast.success("Exercise added!");
   };
 
@@ -171,24 +151,8 @@ const AddExercisesStep = () => {
       return;
     }
 
-    toast.success(
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-primary animate-pulse" />
-          <span className="font-system font-bold text-primary text-lg">
-            LEVEL UP!
-          </span>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Workout plan complete with {totalExercises} exercises
-        </p>
-      </div>,
-      { duration: 4000 }
-    );
+    toast.success('Workout plan complete');
 
-    setTimeout(() => {
-      reset();
-    }, 2000);
   };
 
   return (
@@ -238,9 +202,9 @@ const AddExercisesStep = () => {
                     className="absolute inset-0 pointer-events-none"
                     animate={{
                       boxShadow: [
-                        "inset 0 0 10px hsl(var(--primary) / 0.2)",
-                        "inset 0 0 20px hsl(var(--primary) / 0.3)",
-                        "inset 0 0 10px hsl(var(--primary) / 0.2)",
+                        "inset 0 0 10px rgba(0, 255, 197, 0.2)",
+                        "inset 0 0 20px rgba(0, 255, 197, 0.2)",
+                        "inset 0 0 10px rgba(0, 255, 197, 0.2)",
                       ],
                     }}
                     transition={{ duration: 2, repeat: Infinity }}
@@ -444,10 +408,10 @@ const AddExercisesStep = () => {
 
               <Button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isPending}
                 className="w-full h-11 font-system text-sm uppercase tracking-widest border border-primary/50 bg-primary/20 hover:bg-primary/30 text-primary"
               >
-                {isSubmitting ? (
+                {isPending? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <>
@@ -478,7 +442,7 @@ const AddExercisesStep = () => {
           className="flex-1 font-system uppercase tracking-widest bg-primary hover:bg-primary/90 relative overflow-hidden"
         >
           <motion.div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+            className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -skew-x-12"
             animate={{ x: ["-100%", "200%"] }}
             transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
           />

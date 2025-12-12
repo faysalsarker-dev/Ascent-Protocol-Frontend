@@ -1,13 +1,31 @@
 "use client";
 
-// import { useGetAllPlans } from "@/src/hooks/useWorkoutPlan";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/src/components/ui/skeleton";
 import { AlertTriangle, FileX, Dumbbell } from "lucide-react";
 import WorkoutPlanCard from "./WorkoutPlanCard";
 import { useGetAllPlans } from "@/src/hooks/useWorkoutPlan";
 
+interface WorkoutDay {
+  id: string;
+  name: string;
+  isRestDay: boolean;
+  exercises?: unknown[];
+}
 
+export interface WorkoutPlan {
+  id: string;
+  name: string;
+  description: string | null | undefined;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  startDate: string;
+  endDate: string | null;
+  userId: string;
+  workoutDays: WorkoutDay[];
+  _count: { workoutDays: number };
+}
 
 const AllWorkoutPlans = () => {
   const { data, isLoading, isError } = useGetAllPlans();
@@ -91,7 +109,7 @@ const AllWorkoutPlans = () => {
 
   return (
     <div className="grid gap-6 md:grid-cols-2">
-      {plans.map((plan, index) => (
+      {plans.map((plan:WorkoutPlan, index:number) => (
         <WorkoutPlanCard key={plan.id} plan={plan} index={index} />
       ))}
     </div>

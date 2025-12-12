@@ -16,9 +16,7 @@ import {
 import type {
   WorkoutSession,
   GetSessionsParams,
-  CreateWorkoutSessionPayload,
   UpdateWorkoutSessionPayload,
-  CompleteSessionPayload,
   ApiResponse,
 } from "@/src/types/workout-session";
 
@@ -39,16 +37,15 @@ export function useCurrentWorkoutSession() {
   return useQuery<ApiResponse<WorkoutSession | null>>({
     queryKey: ["workout-session-current"],
     queryFn:() => getCurrentWorkoutSession(),
-    refetchInterval: 5000,
   });
 }
 
 export function useLastWorkoutSession() {
-  return useQuery<ApiResponse<WorkoutSession | null>>({
+  return useQuery({
     queryKey: ["workout-session-last"],
     queryFn:()=> getLastWorkoutSession(),
     staleTime: 1000 * 60 * 120,
-    cacheTime: 1000 * 60 * 120, 
+gcTime: 1000 * 60 * 60,
     refetchOnWindowFocus: false,
   });
 }
@@ -68,9 +65,8 @@ export function useWorkoutSessionById(sessionId: string) {
 
 export function useCreateWorkoutSession() {
   const qc = useQueryClient();
-
-  return useMutation<ApiResponse<WorkoutSession>, Error, CreateWorkoutSessionPayload>({
-    mutationFn: (payload) => createWorkoutSession(payload),
+  return useMutation({
+    mutationFn: (payload:{workoutDayId:string,dayName:string}) => createWorkoutSession(payload),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["workout-sessions"] });
     },
@@ -89,14 +85,13 @@ export function useUpdateWorkoutSession(sessionId: string) {
   });
 }
 
-export function useCompleteWorkoutSession(sessionId: string) {
+export function useCompleteWorkoutSession() {
   const qc = useQueryClient();
 
-  return useMutation<ApiResponse<WorkoutSession>, Error, CompleteSessionPayload | undefined>({
-    mutationFn: (payload) => completeWorkoutSession(sessionId, payload),
+  return useMutation({
+    mutationFn: (sessionId: string) => completeWorkoutSession(sessionId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["workout-sessions"] });
-      qc.invalidateQueries({ queryKey: ["workout-session", sessionId] });
     },
   });
 }

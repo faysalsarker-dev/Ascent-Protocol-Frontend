@@ -86,8 +86,8 @@ const ranks:RankItem[] = [
     name: "Monarch",
     level: "86-99",
     color: "from-accent/40 to-accent/10",
-    borderColor: "border-accent/50",
-    textColor: "text-accent",
+    borderColor: "border-white/10",
+    textColor: "text-white",
     icon: "Crown",
     description: "The pinnacle of power. You've achieved legendary status.",
     perks: ["Unlimited power", "Legendary rewards", "Eternal glory"],
@@ -98,13 +98,17 @@ const RankSystemSection = () => {
   return (
     <section className="py-28 relative overflow-hidden">
       {/* Background */}
+            <div className="absolute top-0 left-0 w-96 h-96 bg-warning/60 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+            <div className="absolute top-1 left-1 w-96 h-96 bg-warning/50 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+
+
       <div className="absolute inset-0 bg-linear-to-b from-background via-card/50 to-background" />
       <div className="absolute inset-0 cyber-grid opacity-10" />
       
       {/* Animated Orbs */}
   <AnimatedOrbs/>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 relative z-10">
 
  <SectionHeader
           badgeIcon="crown"

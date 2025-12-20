@@ -8,6 +8,7 @@ import { Button } from "@/src/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/src/components/ui/sheet";
 import { Menu, X } from "lucide-react";
 import NavAction from "../modules/appbar/navActiop";
+import Image from "next/image";
 
 const navLinks = [
   { title: "Home", href: "/" },
@@ -44,12 +45,32 @@ export default function Navbar({ user }: { user: any }) {
           className="fixed top-0 left-0 w-full z-99 bg-background/70 backdrop-blur-xl border-b border-border/30"
         >
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <Link
-              href="/"
-              className="text-2xl md:text-3xl font-extrabold tracking-tight text-primary"
-            >
-              Ascent <span className="text-accent">Protocol</span>
-            </Link>
+          <Link href="/" className="flex items-center gap-3 group">
+                <motion.div
+                  whileHover={{ scale: 1.05, rotate: 5 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  className="relative"
+                >
+                  <div className="absolute inset-0 bg-primary/20 rounded-xl blur-xl group-hover:bg-primary/30 transition-all duration-300" />
+                  <Image 
+                    src="/logo.png"
+                    alt="Ascent Protocol" 
+                    height={40}
+                    width={40}
+                    className="relative  rounded-xl object-cover"
+                  />
+                </motion.div>
+                <motion.span 
+                  className="hidden sm:block text-xl font-heading font-bold"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <span className="text-foreground">Ascent</span>
+                  <span className="gradient-text ml-1">Protocol</span>
+                </motion.span>
+              </Link>
 
             <nav className="hidden md:flex items-center gap-8">
               {navLinks.map((link) => (
@@ -82,7 +103,9 @@ export default function Navbar({ user }: { user: any }) {
               <NavAction user={user} />
             </nav>
 
-            <div className="md:hidden">
+            <div className="md:hidden flex justify-center items-center gap-2">
+                            <NavAction user={user} />
+
               <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger>
                   <Menu className="w-6 h-6" />

@@ -42,7 +42,7 @@ const LoginForm = () => {
   const { mutate: login, isPending, error } = useLoginUser({
     onSuccess: (data) => {
       toast.success(data.message || "Hunter authentication successful!");
-      router.push("/user");
+      router.push("/user/profile");
     },
   });
 
@@ -283,7 +283,7 @@ const LoginForm = () => {
               >
                 {/* Button Glow Effect */}
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
+                  className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -skew-x-12"
                   initial={{ x: "-100%" }}
                   animate={{ x: isPending ? "100%" : "-100%" }}
                   transition={{ 

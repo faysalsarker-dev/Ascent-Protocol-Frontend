@@ -13,30 +13,15 @@ import { EditDOBDialog } from "@/src/components/modules/profile/EditDOBDialog";
 import { ChangePasswordDialog } from "@/src/components/modules/profile/ChangePasswordDialog";
 import  SystemHeader  from '@/src/components/modules/profile/SystemHeader';
 import  ProfileHeader  from '@/src/components/modules/profile/ProfileHeader';
-import { useGetMe, useUpdateUser } from "@/src/hooks/useAuth";
+import { useGetMe } from "@/src/hooks/useAuth";
 
-const initialUserData = {
-  name: "Shadow Monarch",
-  email: "sung.jinwoo@hunter.guild",
-  avatar: null,
-  level: 27,
-  xp: 27450,
-  totalWorkouts: 156,
-  currentStreak: 12,
-  longestStreak: 45,
-  dateOfBirth: new Date(1995, 5, 15),
-  weight: 75.5,
-  height: 178,
-};
+
 
 const UserProfile = () => {
 
   const {data}= useGetMe()
   const user = data?.data?.user || {};
-  console.log(user,'data')
-const update = useUpdateUser()
 
-  const [userData, setUserData] = useState(initialUserData);
   
   const [editNameOpen, setEditNameOpen] = useState(false);
   const [editWeightOpen, setEditWeightOpen] = useState(false);
@@ -47,7 +32,6 @@ const update = useUpdateUser()
 
 
 
-console.log(user,"users")
 
 
 

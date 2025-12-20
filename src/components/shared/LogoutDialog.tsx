@@ -7,12 +7,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, ShieldAlert, X, LogOut } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/src/components/ui/dialog";
 import { Button } from "@/src/components/ui/button";
-import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import CornerBracket from "@/src/components/ui/CornerBracket";
 import WarningIcon from "@/src/components/ui/WarningIcon";
 import DataStream from "@/src/components/ui/DataStream";
 import GlitchText from "../ui/GlitchText";
+import { deleteCookie } from "../../services/auth/tokenHandlers";
+import { useRouter } from "next/navigation";
 
 interface LogoutDialogProps {
   open: boolean;
@@ -28,11 +29,17 @@ interface LogoutDialogProps {
 export const LogoutDialog = ({ open, onOpenChange }: LogoutDialogProps) => {
   const [confirmProgress, setConfirmProgress] = useState(0);
   const [isHolding, setIsHolding] = useState(false);
+ const router = useRouter()
 
-  const handleConfirm = () => {
-    toast.success("◆ SYSTEM OVERRIDE ◆");
+
+  const handleConfirm = async() => {
+await deleteCookie("accessToken")
+await deleteCookie("refreshToken")
+router.push("/login")
     onOpenChange(false);
   };
+
+
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -47,6 +54,7 @@ export const LogoutDialog = ({ open, onOpenChange }: LogoutDialogProps) => {
         });
       }, 50);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setConfirmProgress(0);
     }
     return () => clearInterval(interval);
@@ -160,7 +168,7 @@ export const LogoutDialog = ({ open, onOpenChange }: LogoutDialogProps) => {
                       transition={{ delay: 0.5 }}
                     >
                       <div className="flex items-center gap-2 px-3 py-2 bg-destructive/10 border border-destructive/30 rounded-sm">
-                        <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0" />
+                        <AlertTriangle className="w-4 h-4 text-destructive shrink-0" />
                         <span className="font-mono text-[10px] text-destructive/80">
                           WARNING: Session data will be purged
                         </span>
@@ -213,7 +221,7 @@ export const LogoutDialog = ({ open, onOpenChange }: LogoutDialogProps) => {
                     transition={{ delay: 0.8 }}
                     className="text-center space-y-2"
                   >
-                    <div className="h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+                    <div className="h-px bg-linear-to-r from-transparent via-primary/30 to-transparent" />
                     <p className="font-mono text-[9px] text-primary/50 tracking-[0.2em] uppercase">
                       ◆ Security Protocol v2.4.1 Active ◆
                     </p>

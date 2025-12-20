@@ -1,3 +1,5 @@
+
+
 import UserProfile from "@/src/components/modules/profile/UserProfile";
 
 const Profile = () => {

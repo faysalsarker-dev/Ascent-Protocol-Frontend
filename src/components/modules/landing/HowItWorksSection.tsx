@@ -52,11 +52,12 @@ const HowItWorksSection = () => {
     <section id="how-it-works" className="py-28 relative overflow-hidden">
       {/* Background Gradient */}
       <div className="absolute inset-0 bg-linear-to-b from-background via-card/50 to-background" />
+      <div className="absolute -bottom-4 right-0 bg-secondary/20 w-60 h-60 blur-3xl" />
 
       {/* Decorative Elements */}
       <DecorativeElements />
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="max-w-6xl mx-auto px-4 relative z-10">
         <SectionHeader
           badgeIcon="settings"
           iconClassName="text-secondary"
@@ -77,7 +78,7 @@ const HowItWorksSection = () => {
           </div>
 
           {/* Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 ">
             {steps.map((item:HowItWorkItem, index:number) => (
               <HowItWorkCard key={index} item={item} index={index} totalSteps={4} />
             ))}

@@ -77,7 +77,7 @@ const velocityTimeout = useRef<NodeJS.Timeout | null>(null);
       </div>
 
       {/* Scrolling Content - uses negative margin to overlay the sticky background */}
-      <div className="relative z-10 -mt-[100vh] overflow-x-hidden">
+      <div className="relative z-10 -mt-[100vh] overflow-x-hidden ">
  <div className="sticky top-0 left-0 w-full h-40 bg-linear-to-b from-black via-black/60 to-transparent z-20 pointer-events-none" />
 
 

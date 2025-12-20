@@ -1,57 +1,70 @@
-import { Message } from "./ChatLayout";
+import { motion } from "framer-motion";
+import { User, Bot, Copy, Check } from "lucide-react";
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-const MessageBubble = ({ content, role, isStreaming }: Message) => {
+
+interface MessageBubbleProps {
+  id: string;
+  content: string;
+  role: "user" | "assistant";
+  isStreaming?: boolean;
+}
+
+const MessageBubble = ({ content, role, isStreaming }: MessageBubbleProps) => {
+  const [copied, setCopied] = useState(false);
   const isUser = role === "user";
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div
-      className={`
-        w-full py-6 px-4
-       
-      `}
+      className={`flex items-start gap-3 group ${
+        isUser ? "flex-row-reverse" : "flex-row"
+      }`}
     >
-      <div
-        className={`
-          max-w-3xl mx-auto flex gap-4
-          ${isUser ? "flex-row-reverse" : ""}
-        `}
+      {/* Avatar */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.2 }}
+        className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${
+          isUser
+            ? "bg-primary text-primary-foreground"
+            : "bg-muted text-muted-foreground"
+        }`}
       >
-        {/* Avatar */}
-        <div
-          className={`
-            w-8 h-8 rounded-md flex items-center justify-center shrink-0
-            ${isUser ? "bg-primary text-primary-foreground" : "bg-muted"}
-          `}
-        >
-          {isUser ? (
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-            </svg>
-          ) : (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              />
-            </svg>
-          )}
-        </div>
+        {isUser ? (
+          <User className="w-4 h-4" strokeWidth={2} />
+        ) : (
+          <Bot className="w-4 h-4" strokeWidth={2} />
+        )}
+      </motion.div>
 
-        {/* Message Bubble */}
-        <div className={`flex-1 flex flex-col ${isUser ? "items-end" : "items-start"}`}>
-          <div
-            className={`
-              text-sm max-w-full rounded-xl px-4 py-3
-              ${isUser ? "bg-primary text-primary-foreground" : "bg-muted"}
-            `}
-          >
-            {/* Wrap markdown in a styled div */}
-            <div className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown
+      {/* Message Content */}
+      <div
+        className={`flex flex-col max-w-[80%] sm:max-w-[75%] ${
+          isUser ? "items-end" : "items-start"
+        }`}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 8, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className={`relative px-4 py-3 shadow-sm ${
+            isUser
+              ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-md"
+              : "bg-card text-card-foreground rounded-2xl rounded-tl-md border border-border/40"
+          }`}
+        >
+          <>
+
+     <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={{
                   p: (props) => <p className="mb-3 leading-relaxed" {...props} />,
@@ -63,17 +76,39 @@ const MessageBubble = ({ content, role, isStreaming }: Message) => {
               >
                 {content}
               </ReactMarkdown>
-            </div>
 
             {isStreaming && (
-              <span className="inline-block w-2 h-4 bg-foreground/80 ml-1 animate-pulse" />
+              <motion.span
+                animate={{ opacity: [1, 0] }}
+                transition={{ duration: 0.5, repeat: Infinity }}
+                className="inline-block w-0.5 h-4 bg-current ml-0.5 align-middle"
+              />
             )}
-          </div>
+          </>
 
-          <p className="text-xs text-muted-foreground mt-2">
-            {isUser ? "You" : "Assistant"}
-          </p>
-        </div>
+          {/* Copy button for assistant messages */}
+          {!isUser && !isStreaming && (
+            <motion.button
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+              onClick={handleCopy}
+              className="absolute -bottom-8 left-0 flex items-center gap-1.5 text-xs text-muted-foreground/70 hover:text-muted-foreground transition-colors opacity-0 group-hover:opacity-100"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-3 h-3" />
+                  <span>Copied</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-3 h-3" />
+                  <span>Copy</span>
+                </>
+              )}
+            </motion.button>
+          )}
+        </motion.div>
       </div>
     </div>
   );

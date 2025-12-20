@@ -37,8 +37,10 @@ const ChatLayout = () => {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const {data ,isLoading, refetch}=useChatHistoryToday()
   const { mutateAsync ,isPending} = useSendChatMessage();
-const msg = data?.data || []
+const messages = data?.data || []
 
+
+console.log(data,'data')
   const handleSelectDate = (date: string) => {
     router.push(`?chat-date=${date}`);
   };
@@ -72,8 +74,9 @@ const msg = data?.data || []
   };
 
   return (
-    <div className="flex h-screen bg-background/30 ">
+<div className="flex h-screen bg-chat-bg overflow-hidden">
       <ChatSidebar
+    
         selectedDate={selectedDate}
         onSelectDate={handleSelectDate}
         onNewChat={handleNewChat}
@@ -81,10 +84,10 @@ const msg = data?.data || []
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <MessageList messages={msg} isLoading={isLoading || isPending} />
-        <ChatInput onSend={handleSend} disabled={isPending} />
-      </div>
+      <main className="flex-1 flex flex-col min-w-0 relative">
+        <MessageList messages={messages} isLoading={isLoading} />
+        <ChatInput onSend={handleSend} disabled={isLoading} />
+      </main>
 
       <LoginAlert
         isOpen={showLoginAlert}

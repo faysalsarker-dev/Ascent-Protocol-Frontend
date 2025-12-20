@@ -107,7 +107,7 @@ interface LevelUpCardsProps {
 
 const LevelUpCards = ({ onCardInView }: LevelUpCardsProps) => {
   return (
-    <div className="relative flex flex-col items-center gap-[40vh] py-[15vh] max-w-7xl mx-auto px-4">
+    <div className="relative flex flex-col items-center gap-[40vh] py-[15vh] max-w-6xl mx-auto px-4">
       {progressCards.map((card, index) => (
         <CardItem 
           key={card.id} 

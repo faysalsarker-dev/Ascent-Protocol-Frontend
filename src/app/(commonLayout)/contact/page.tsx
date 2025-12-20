@@ -1,6 +1,4 @@
 
-import Navbar from "@/src/components/shared/Navbar";
-import Footer from "@/src/components/shared/Footer";
 import { SectionHeader ,ContactForm } from "../_components";
 
 const ContactPage = () => {
@@ -9,7 +7,7 @@ const ContactPage = () => {
   return (
     <>
 
-    <main className="min-h-screen bg-background overflow-x-hidden">
+    <main className="min-h-screen bg-background overflow-x-hidden max-w-6xl mx-auto">
       <section className="pt-32 pb-20 relative">
         <div className="absolute inset-0 cyber-grid opacity-10" />
    

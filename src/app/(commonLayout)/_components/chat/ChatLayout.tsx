@@ -6,9 +6,8 @@ import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import LoginAlert from "./LoginAlert";
 import { useChatHistoryToday, useSendChatMessage } from "@/src/hooks/useChat";
+import { getUser } from "@/src/utils/getUser";
 
-// Mock services - replace with your actual implementations
-const mockGetUser = async () => ({ id: "user123", name: "User" });
 
 
 
@@ -51,7 +50,7 @@ console.log(data,'data')
   };
 
   const handleSend = async (content: string) => {
-    const user = await mockGetUser();
+    const user = await getUser();
     if (!user) {
       setShowLoginAlert(true);
       return;

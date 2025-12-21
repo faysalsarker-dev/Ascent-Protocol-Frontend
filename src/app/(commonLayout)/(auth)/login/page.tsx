@@ -1,4 +1,5 @@
 
+import DemoCredentialsBar from "@/src/components/modules/auth/DemoCredentialsBar";
 import  LoginForm  from "@/src/components/modules/auth/LoginForm";
 
 const LoginPage = () => {
@@ -6,7 +7,7 @@ const LoginPage = () => {
     <div className="min-h-screen  relative overflow-hidden ">
      
 
-   
+   <DemoCredentialsBar />
       <div className="relative z-10 w-full md:px-4">
         <div className="mx-auto max-w-lg">
           
